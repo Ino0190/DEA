@@ -1522,9 +1522,9 @@ function genJumon(){
   });
   const payload={v:2,banks:banks};
   // ⚡どっち（amida）の「間違えたものモード」記録も同梱する。
-  // 持ち運ぶ価値のある永久記録だけ。その場限りの定着カウント(amida_need_v1)は入れない＝呪文を短く保つ。
+  // 持ち運ぶ価値のある永久記録だけ。その場限りの定着カウント(dea_amida_need_v1)は入れない＝呪文を短く保つ。
   try{
-    const ev=JSON.parse(localStorage.getItem('amida_everwrong_v1'))||{};
+    const ev=JSON.parse(localStorage.getItem('dea_amida_everwrong_v1'))||{};
     if(ev&&Object.keys(ev).length) payload.amida={ever:ev};
   }catch(e){}
   document.getElementById('jOut').value=encodeJumon(payload);
@@ -1569,13 +1569,13 @@ function applyJumon(){
     // ⚡どっち（amida）の間違えたものモード記録も合算（重複はスキップ・履歴は消えない）
     let amidaMerged=0;
     if(data.amida&&data.amida.ever&&typeof data.amida.ever==='object'){
-      let cur={};try{cur=JSON.parse(localStorage.getItem('amida_everwrong_v1'))||{};}catch(e){cur={};}
+      let cur={};try{cur=JSON.parse(localStorage.getItem('dea_amida_everwrong_v1'))||{};}catch(e){cur={};}
       Object.entries(data.amida.ever).forEach(([deck,list])=>{
         if(!Array.isArray(list))return;
         if(!cur[deck])cur[deck]=[];
         list.forEach(t=>{if(!cur[deck].includes(t)){cur[deck].push(t);amidaMerged++;}});
       });
-      try{localStorage.setItem('amida_everwrong_v1',JSON.stringify(cur));}catch(e){}
+      try{localStorage.setItem('dea_amida_everwrong_v1',JSON.stringify(cur));}catch(e){}
     }
     saveProgress();renderHome();closeJumon();
     alert('✨ 全'+touched+'セットを復元しました（履歴は消えません）\n\n'+lines.join('\n')+(amidaMerged?'\n・⚡どっち：+'+amidaMerged+'枚':'')+'\n\n※ホームは「いま選んでいる問題セット」だけを表示します。上の A〜E を切り替えると各セットの復元内容が見られます。');

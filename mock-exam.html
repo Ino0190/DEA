@@ -376,7 +376,7 @@ function saveWrongToReview(){
     (byBank[bank] = byBank[bank] || []).push({id:q.id, ok:isCorrect(q, exam.answers[i])});
   });
   for(const [bank, items] of Object.entries(byBank)){
-    const key = 'saa_drill_progress_v1_' + bank;
+    const key = 'dea_drill_progress_v1_' + bank;
     let prog;
     try{ prog = JSON.parse(localStorage.getItem(key)) || {}; }catch(e){ prog = {}; }
     prog.seen = prog.seen || {}; prog.wrong = prog.wrong || {};

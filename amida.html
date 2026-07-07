@@ -229,9 +229,9 @@ const decks = {
 // 定着ルール: 間違えた問題は3回連続で正解するまでキューに残す。
 // 進捗はlocalStorageに保存し、次回開いたときも「まだ覚えてない問題」を覚えておく。
 const MASTER_NEED = 3;          // 間違えた問題が定着するのに必要な連続正解数
-const STORE_KEY = 'amida_need_v1';
-const EVER_KEY = 'amida_everwrong_v1';  // 一度でも間違えたカードを永久記録（定着しても消さない）
-const SEEN_KEY = 'amida_seen_v1';       // 一度でも解いたカードを記録（未着手判定用・デッキID→[質問文]）
+const STORE_KEY = 'dea_amida_need_v1';
+const EVER_KEY = 'dea_amida_everwrong_v1';  // 一度でも間違えたカードを永久記録（定着しても消さない）
+const SEEN_KEY = 'dea_amida_seen_v1';       // 一度でも解いたカードを記録（未着手判定用・デッキID→[質問文]）
 
 // ----- 一度でも間違えたカードの永久記録（デッキID→[質問文,...]） -----
 function loadEver(){
@@ -755,7 +755,7 @@ async function runImportPipeline(source) {
   try {
     saveEver(ever);
   } catch (e) {
-    result.errors.push('amida_everwrong_v1 の書き込みに失敗');
+    result.errors.push('dea_amida_everwrong_v1 の書き込みに失敗');
   }
 
   return result;
