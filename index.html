@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>DEA シナリオ判断ドリル</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f1420; --card:#1a2233; --card2:#222d44;
+  --line:#2e3a52; --text:#e8edf5; --sub:#9fb0c8;
+  --accent:#ff9900; --ok:#2ecc71; --ng:#e74c3c; --blue:#4a9eff;
+}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;font-size:17px;line-height:1.7;-webkit-text-size-adjust:100%}
+body{padding:0 0 90px;max-width:680px;margin:0 auto;min-height:100vh}
+
+/* ヘッダー */
+header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 16px}
+.htop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.htitle{font-size:16px;font-weight:700;color:var(--accent)}
+.hstat{font-size:14px;color:var(--sub)}
+.bar{height:6px;background:var(--card);border-radius:3px;margin-top:10px;overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+
+/* 画面共通 */
+.screen{display:none;padding:18px 16px}
+.screen.on{display:block}
+
+/* ホーム */
+.home h1{font-size:24px;line-height:1.4;margin-bottom:6px}
+.home p.lead{color:var(--sub);font-size:16px;margin-bottom:20px}
+.modecard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px;cursor:pointer;transition:.15s}
+.modecard:active{transform:scale(.98)}
+.modecard h3{font-size:18px;margin-bottom:4px}
+.modecard p{font-size:14px;color:var(--sub)}
+.modecard .cnt{font-size:13px;color:var(--accent);margin-top:6px}
+.tip{background:var(--card2);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 16px;margin:18px 0;font-size:15px}
+.tip b{color:var(--accent)}
+.catgrid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.catchip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:7px 14px;font-size:14px;cursor:pointer}
+.catchip:active{background:var(--card2)}
+.xpick{display:flex;flex-direction:column;gap:10px}
+.xchip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.15s}
+.xchip:active{transform:scale(.98);background:var(--card2)}
+.xchip b{font-size:15px;color:var(--accent);font-weight:700}
+.xchip.xall{border-color:var(--accent);font-weight:700}
+
+/* 弱点特訓チップ */
+.weakchips{display:flex;flex-wrap:wrap;gap:8px}
+.wchip{background:var(--card);border:2px solid var(--ng);border-radius:20px;padding:8px 14px;font-size:15px;cursor:pointer;display:flex;gap:8px;align-items:center;transition:.15s}
+.wchip:active{transform:scale(.97)}
+.wchip.on{background:rgba(231,76,60,.15)}
+.wchip:not(.on){border-color:var(--line);opacity:.5}
+.wchip-rate{color:var(--ng);font-weight:700;font-size:14px}
+.wchip-cnt{color:var(--sub);font-size:13px}
+
+/* テーマ別グラフ */
+.themetabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.ttab{font-size:14px;padding:7px 14px;border-radius:18px;border:1px solid var(--line);background:var(--card);color:var(--sub);cursor:pointer;font-family:inherit;font-weight:700}
+.ttab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tbars{display:flex;flex-direction:column;gap:9px}
+.tbar{cursor:pointer}
+.tbar-l{font-size:14px;margin-bottom:3px}
+.tbar-n{color:var(--sub);font-size:12px;margin-left:4px}
+.tbar-track{position:relative;height:22px;background:var(--card);border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex}
+.tbar-fill{height:100%;border-radius:6px 0 0 6px;transition:width .3s}
+.tseg{height:100%;transition:width .3s}
+.tbar-v{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:var(--text)}
+.tbar:active .tbar-track{outline:2px solid var(--accent)}
+.themehint{font-size:12px;color:var(--sub);margin-top:8px}
+.tlegend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin:2px 0 10px}
+.tlegend span{display:flex;align-items:center;gap:4px}
+.tlegend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+/* 問題 */
+.qmeta{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:10px}
+.qcat{color:var(--blue);font-weight:700}
+.qbody{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;font-size:16px;line-height:1.8}
+.qbody .ask{display:block;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-weight:700;font-size:17px;color:#fff}
+.qbody .kw{color:var(--accent);font-weight:700}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:14px 16px;font-size:16px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;transition:.12s}
+.opt:active{transform:scale(.99)}
+.opt .lab{flex:0 0 24px;height:24px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--sub)}
+.opt .ot{flex:1}
+.opt.sel{border-color:var(--blue)}
+.multiHint{background:rgba(74,158,255,.12);border:1px solid var(--blue);color:var(--blue);border-radius:8px;padding:9px 13px;font-size:15px;font-weight:bold;margin-bottom:6px}
+.opt.correct{border-color:var(--ok);background:rgba(46,204,113,.12)}
+.opt.correct .lab{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--ng);background:rgba(231,76,60,.12)}
+.opt.wrong .lab{background:var(--ng);color:#fff}
+.opt.disabled{cursor:default}
+
+/* 解説 */
+.exp{display:none;margin-top:16px;background:var(--card2);border-radius:12px;padding:16px;font-size:15px;line-height:1.8}
+.exp.on{display:block}
+.exp .verdict{font-size:17px;font-weight:700;margin-bottom:8px}
+.exp .verdict.ok{color:var(--ok)}
+.exp .verdict.ng{color:var(--ng)}
+.exp .h{color:var(--accent);font-weight:700;margin:10px 0 4px}
+.exp .elim{font-size:14px;color:var(--sub);margin-top:8px}
+/* 正解の全文表示 */
+.ansfull{background:rgba(46,204,113,.12);border:1px solid var(--ok);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:15px;line-height:1.7}
+.ansfull .anslab{display:inline-block;background:var(--ok);color:#fff;font-weight:700;font-size:13px;border-radius:6px;padding:2px 9px;margin-right:8px}
+/* 混同注意 */
+.confbox{margin-top:12px;background:rgba(255,153,0,.1);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.75}
+.confbox .confh{color:var(--accent);font-weight:700;margin-bottom:5px}
+.confbox b{color:#fff}
+.confpair{margin-top:8px}
+.confpair .confvs{margin-bottom:2px}
+.confpair .confd{padding-left:2px}
+/* 用語ミニ辞典 */
+.termbox{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 14px}
+.termrow{font-size:14px;line-height:1.7;padding:7px 0;border-bottom:1px dashed var(--line)}
+.termrow:last-child{border-bottom:none}
+.termrow b{color:var(--blue)}
+
+/* もっと詳しく（背景解説） */
+.moreBtn{margin-top:14px;width:100%;background:var(--card);border:1px solid var(--blue);color:var(--blue);border-radius:12px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+.moreBtn:active{background:var(--card2)}
+.promptBtn{margin-top:10px;width:100%;background:var(--accent);border:none;color:#1a1200;border-radius:12px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+.promptBtn:active{opacity:.85}
+.promptHint{font-size:13px;color:var(--sub);margin-top:6px;line-height:1.6}
+/* 自信がなかった（復習に入れる） */
+.unsureBtn{margin-top:10px;width:100%;background:var(--card);border:1px solid var(--sub);color:var(--sub);border-radius:12px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+.unsureBtn:active{background:var(--card2)}
+.unsureBtn.done{border-color:var(--accent);color:var(--accent);background:rgba(255,153,0,.08)}
+.patternBtn{display:block;margin-top:10px;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;background:var(--card);border:1px solid var(--accent);color:var(--accent);border-radius:12px;padding:13px;font-size:16px;font-weight:700;font-family:inherit}
+.patternBtn:active{background:var(--card2)}
+.zukaiBtn{display:block;margin-top:10px;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;background:var(--card);border:1px solid #38bdf8;color:#38bdf8;border-radius:12px;padding:13px;font-size:16px;font-weight:700;font-family:inherit}
+.zukaiBtn:active{background:var(--card2)}
+.deep{display:none;margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;font-size:15px;line-height:1.85}
+.deep.on{display:block}
+.deep .dh{color:var(--blue);font-weight:700;font-size:16px;margin:14px 0 6px}
+.deep .dh:first-child{margin-top:0}
+.deep .nick{background:var(--card2);border-radius:10px;padding:11px 13px;margin:7px 0;font-size:15px}
+.deep b{color:#fff}
+.deep .fig{display:block;width:100%;max-width:520px;height:auto;margin:10px auto 4px;background:#0f1420;border:1px solid var(--line);border-radius:10px;padding:10px}
+.deep .figcap{font-size:13px;color:var(--sub);margin:4px 2px 0;line-height:1.65}
+
+/* ボタン */
+.btnrow{position:fixed;bottom:0;left:0;right:0;max-width:680px;margin:0 auto;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(15,20,32,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;gap:10px}
+.btn{flex:1;border:none;border-radius:12px;padding:15px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn.primary{background:var(--accent);color:#1a1200}
+.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.btn:disabled{opacity:.4}
+.btn.small{flex:0 0 auto;padding:15px 18px}
+
+/* 結果 */
+.result{text-align:center;padding-top:30px}
+.result .score{font-size:56px;font-weight:800;color:var(--accent)}
+.result .smeta{color:var(--sub);font-size:16px;margin:6px 0 20px}
+.result .msg{font-size:18px;margin-bottom:24px;line-height:1.6}
+.reviewlist{text-align:left;margin-top:10px}
+.ritem{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;font-size:14px}
+.ritem .rc{color:var(--blue);font-size:12px}
+
+/* トースト */
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--ok);color:#fff;padding:12px 22px;border-radius:24px;font-size:15px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,.4);max-width:90%;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ふっかつのじゅもん モーダル */
+.jmask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.jmask.on{display:flex;align-items:flex-start;justify-content:center}
+.jcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px;max-width:560px;width:100%;margin:auto}
+.jtitle{font-size:20px;font-weight:800;color:var(--accent);margin-bottom:8px;text-align:center}
+.jlead{font-size:14px;color:var(--sub);line-height:1.7;margin-bottom:16px}
+.jsec{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.jsech{font-size:15px;font-weight:700;color:var(--blue);margin-bottom:10px}
+.jta{width:100%;min-height:88px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.6;resize:vertical;word-break:break-all}
+.jrow{display:flex;gap:10px;margin-top:10px}
+.jrow .btn{flex:1;padding:13px;font-size:15px}
+.jnote{font-size:12px;color:var(--sub);margin-top:8px;line-height:1.6}
+
+/* 聞き流しモード */
+.modecard.listen{border-color:var(--blue)}
+.modecard.listen h3{color:var(--blue)}
+#scListen{padding:0;position:relative}
+.listenTap{min-height:calc(100vh - 56px);display:flex;flex-direction:column;padding:20px 18px 120px;cursor:pointer}
+.listenStage{font-size:14px;color:var(--blue);font-weight:700;letter-spacing:.05em;margin-bottom:6px;min-height:20px}
+.listenQno{font-size:14px;color:var(--sub);margin-bottom:14px}
+.listenScenario{font-size:17px;line-height:1.85;margin-bottom:18px}
+.listenScenario .ask{display:block;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-weight:700;color:#fff}
+.listenScenario .kw{color:var(--accent);font-weight:700}
+.listenOpts{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.listenOpt{background:var(--card);border:2px solid var(--line);border-radius:10px;padding:11px 14px;font-size:15px;display:flex;gap:9px}
+.listenOpt.ans{border-color:var(--ok);background:rgba(46,204,113,.12)}
+.listenOpt .lab{flex:0 0 22px;height:22px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--sub)}
+.listenOpt.ans .lab{background:var(--ok);color:#fff}
+.listenWhy{background:var(--card2);border-radius:10px;padding:14px;font-size:15px;line-height:1.8;display:none}
+.listenWhy.on{display:block}
+.listenWhy .h{color:var(--accent);font-weight:700;margin:8px 0 3px}
+.listenWhy .h:first-child{margin-top:0}
+.listenHint{position:fixed;left:0;right:0;bottom:78px;max-width:680px;margin:0 auto;text-align:center;font-size:13px;color:var(--sub);pointer-events:none;padding:0 16px}
+.listenThinking{text-align:center;font-size:22px;font-weight:800;color:var(--accent);margin:24px 0;display:none}
+.listenThinking.on{display:block}
+/* 問題セット切替トグル */
+.bankToggle{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.bankLabel{font-size:14px;color:var(--sub);margin-right:2px}
+.bankBtn{font-size:15px;padding:8px 16px;border-radius:18px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-family:inherit}
+.bankBtn.on{background:var(--accent);color:#fff;font-weight:700}
+.appnav{display:flex;gap:6px;max-width:680px;margin:0 auto;padding:8px 12px;background:var(--bg)}
+.appnav .navbtn{flex:1;text-align:center;text-decoration:none;font-size:14px;font-weight:700;color:var(--sub);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 4px}
+.appnav .navbtn.active{color:#1a1200;background:var(--accent);border-color:var(--accent)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="htop">
+    <div class="htitle" id="hTitle">DEA ドリル</div>
+    <div class="hstat" id="hStat"></div>
+  </div>
+  <div class="bar"><i id="hBar"></i></div>
+</header>
+<nav class="appnav">
+  <a class="navbtn active" href="index.html">🎯 ドリル</a>
+  <a class="navbtn" href="amida.html">⚡ どっち</a>
+</nav>
+
+<!-- ホーム -->
+<section class="screen on home" id="scHome">
+  <h1>DEA シナリオ判断ドリル</h1>
+  <p class="lead">電車で1問ずつ。状況文から「本当の質問」を抜き出す練習。</p>
+
+  <div id="bankToggle" class="bankToggle"></div>
+
+  <div id="allBankProg"></div>
+
+  <div class="tip">
+    <b>読み方の型：</b>長い状況説明はほぼ飾り。<b>最後の1行</b>と、その中の<b>キーワード</b>（コスト最小／手間最小／可用性最大／最も安全 など）だけが正解を決める。選択肢4つのうち2つは「やりすぎ」か「明らかに違う」。
+  </div>
+
+
+  <div class="modecard" onclick="startMode('all')">
+    <h3>▶ 全問を順番に</h3>
+    <p>頭から全部解く。まずはこれ。</p>
+    <div class="cnt" id="cntAll"></div>
+  </div>
+  <div class="modecard" onclick="startMode('unseen')">
+    <h3>🆕 まだ解いてない問題から</h3>
+    <p>一度も解いていない問題だけを出す。やり残しを潰す。</p>
+    <div class="cnt" id="cntUnseen"></div>
+  </div>
+  <div class="modecard" onclick="startMode('wrong')">
+    <h3>🔁 間違えた問題だけ</h3>
+    <p>前回ミスした問題を、間違えた回数の多い順に復習。</p>
+    <div class="cnt" id="cntWrong"></div>
+  </div>
+  <div class="modecard" onclick="openWeakness()" style="border-color:var(--ng)">
+    <h3 style="color:var(--ng)">🔥 弱点特訓</h3>
+    <p>ミス率の高い分野を自動検出し、全バンクから横断で20問。弱点を集中攻撃。</p>
+    <div class="cnt" id="cntWeak"></div>
+  </div>
+
+  <div class="modecard" onclick="openCrossWrong()" style="border-color:var(--accent)">
+    <h3 style="color:var(--accent)">🌐 全セット横断で間違いを解き直す</h3>
+    <p>A〜D全バンクの間違いを分野で絞って解き直す。正解すれば各セットの「間違えた問題」から外れ、数字が動く。データ分析だけ・ネットワークだけ、と弱点を集中攻撃できる。</p>
+    <div class="cnt" id="cntCross"></div>
+  </div>
+  <div class="modecard" onclick="startReview()">
+    <h3>📖 間違えた問題の解説を読む</h3>
+    <p>解かずに、ミスした問題の解説だけをじっくり読む。解く時に流し読みした理由を、後でまとめて頭に入れる用。</p>
+    <div class="cnt" id="cntReview"></div>
+  </div>
+  <div class="modecard" onclick="startMode('shuffle')">
+    <h3>🎲 ランダム10問</h3>
+    <p>スキマ時間用。シャッフルで10問。</p>
+  </div>
+
+
+  <h3 style="margin:22px 0 4px;font-size:16px;color:var(--sub)">テーマ別の正答率</h3>
+  <div id="themeWrap"></div>
+
+  <div style="margin-top:24px;text-align:center">
+    <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px" onclick="copyWeakness()">🤖 弱点をAIに相談（コピー）</button>
+    <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px;margin-left:8px" onclick="openJumon()">📜 ふっかつのじゅもん</button>
+    <button class="btn ghost" style="flex:0 0 auto;display:inline-block;width:auto;padding:10px 18px;font-size:14px;margin-left:8px" onclick="resetProgress()">進捗をリセット</button>
+  </div>
+</section>
+
+<!-- 問題 -->
+<section class="screen" id="scQuiz">
+  <div class="qmeta">
+    <span class="qcat" id="qCat"></span>
+    <span id="qIdx"></span>
+  </div>
+  <div class="qbody" id="qBody"></div>
+  <div class="opts" id="qOpts"></div>
+  <div class="exp" id="qExp"></div>
+</section>
+
+<!-- 結果 -->
+<section class="screen result" id="scResult">
+  <div class="score" id="rScore"></div>
+  <div class="smeta" id="rMeta"></div>
+  <div class="msg" id="rMsg"></div>
+  <div class="reviewlist" id="rReview"></div>
+</section>
+
+<!-- 10問ごとの小休止 -->
+<section class="screen result" id="scBreak">
+  <div style="font-size:48px;margin-bottom:8px">☕</div>
+  <div class="msg" id="brkMsg" style="font-size:22px;font-weight:700"></div>
+  <div class="smeta" id="brkSub" style="margin:10px 0 24px"></div>
+  <button class="btn primary" onclick="resumeQuiz()">続ける ▶</button>
+  <div style="text-align:center;margin-top:12px">
+    <button class="btn ghost small" style="width:auto;display:inline-block;padding:8px 18px" onclick="finish()">ここまでの結果を見る</button>
+  </div>
+  <div style="text-align:center;margin-top:8px">
+    <button class="btn ghost small" style="width:auto;display:inline-block;padding:8px 18px" onclick="goHome()">ホームへ</button>
+  </div>
+</section>
+
+<!-- 全セット横断 間違い分野ピッカー -->
+<section class="screen" id="scXpick">
+  <p style="font-size:16px;color:var(--sub);margin:4px 0 14px">解き直したい分野を選んでください。正解すると、その問題が属するセットの「間違えた問題」から外れます。</p>
+  <div id="xpickWrap" class="xpick"></div>
+  <div style="text-align:center;margin-top:18px">
+    <button class="btn ghost small" style="width:auto;display:inline-block;padding:8px 18px" onclick="goHome()">ホームへ</button>
+  </div>
+</section>
+
+<!-- 弱点特訓 確認画面 -->
+<section class="screen" id="scWeakConfirm">
+  <h2 style="font-size:20px;margin-bottom:14px">🔥 弱点特訓</h2>
+  <p style="font-size:16px;color:var(--sub);margin-bottom:16px">ミス率40%以上の分野を検出しました。タップで除外できます。</p>
+  <div id="weakChips" class="weakchips"></div>
+  <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+    <button class="btn primary" id="weakStartBtn" onclick="startWeakness()">この 20 問で開始</button>
+    <button class="btn ghost" onclick="goHome()">やめる</button>
+  </div>
+</section>
+
+<!-- 間違いの解説を読むモード -->
+<section class="screen" id="scReview">
+  <div class="qmeta"><span class="qcat" id="rvCat"></span><span id="rvIdx"></span></div>
+  <div class="qbody" id="rvBody"></div>
+  <div class="opts" id="rvOpts"></div>
+  <div class="exp on" id="rvExp"></div>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn ghost small" onclick="reviewGo(-1)">◀ 前</button>
+    <button class="btn ghost small" onclick="reviewClear()">✓ もう大丈夫</button>
+    <button class="btn primary" onclick="reviewGo(1)">次 ▶</button>
+  </div>
+  <div style="text-align:center;margin-top:10px">
+    <button class="btn ghost small" style="width:auto;display:inline-block;padding:8px 18px" onclick="goHome()">ホームへ</button>
+  </div>
+</section>
+
+<!-- 聞き流しモード -->
+<section class="screen" id="scListen">
+  <div class="listenTap" id="listenTap" onclick="listenReplay()">
+    <div class="listenStage" id="lStage"></div>
+    <div class="listenQno" id="lQno"></div>
+    <div class="listenScenario" id="lScenario"></div>
+    <div class="listenOpts" id="lOpts"></div>
+    <div class="listenThinking" id="lThinking">⏳ 考えてみよう…</div>
+    <div class="listenWhy" id="lWhy"></div>
+  </div>
+  <div class="listenHint" id="lHint">画面をタップ → この問題を最初からもう一度</div>
+</section>
+
+<!-- 下部ボタン -->
+<div class="btnrow" id="btnRow" style="display:none">
+  <button class="btn ghost small" onclick="goHome()">中断</button>
+  <button class="btn primary" id="btnNext" onclick="nextQ()">解答する</button>
+</div>
+
+<!-- 聞き流し用ボタン -->
+<div class="btnrow" id="listenBar" style="display:none">
+  <button class="btn ghost small" onclick="stopListen()">■ 終了</button>
+  <button class="btn primary" id="listenPause" onclick="listenTogglePause()">⏸ 一時停止</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ふっかつのじゅもん モーダル -->
+<div class="jmask" id="jmask" onclick="if(event.target===this)closeJumon()">
+  <div class="jcard">
+    <div class="jtitle">📜 ふっかつのじゅもん</div>
+    <p class="jlead">PCとスマホで進捗（学習済み・間違えた回数）を引き継げる。<br><b>A〜D 全セットまとめて</b>持ち運べます。片方で「じゅもんを書き写す」→もう片方で貼り付けて読み込むと、各セットごとに記録が合算されます。</p>
+
+    <div class="jsec">
+      <div class="jsech">① いまの進捗を じゅもんにする（書き写す側）</div>
+      <textarea id="jOut" class="jta" readonly placeholder="ボタンを押すと ここに じゅもんが出る"></textarea>
+      <div class="jrow">
+        <button class="btn primary" onclick="genJumon()">じゅもんを 出す</button>
+        <button class="btn ghost" onclick="copyJumon()">コピー</button>
+      </div>
+    </div>
+
+    <div class="jsec">
+      <div class="jsech">② じゅもんを 打ち込む（よみがえらせる側）</div>
+      <textarea id="jIn" class="jta" placeholder="ここに じゅもんを 貼り付ける"></textarea>
+      <div class="jrow">
+        <button class="btn primary" onclick="applyJumon()">ぼうけんのしょを よみがえらせる</button>
+      </div>
+      <p class="jnote">※ 今の進捗に「合算」されます（履歴は消えません）。同じ端末で出した古いじゅもんを読み戻しても二重加算されないよう、回数は多い方を採用します。</p>
+    </div>
+
+    <button class="btn ghost" style="width:100%;margin-top:6px" onclick="closeJumon()">とじる</button>
+  </div>
+</div>
+
+<script>
+// ===== 問題バンク切替（A=main / B=v2 / C=v3 / D=v4 / E=v5。各セットの件数はホームの「全セットの進捗」に動的表示）=====
+const BANKS={
+  main:{file:'questions.js', label:'A・基礎65問'},
+  v2:{file:'questions_v2.js', label:'B・未カバー65問'},
+  v3:{file:'questions_v3.js', label:'C・補強20問'}
+};
+function currentBank(){
+  const b=localStorage.getItem('dea_drill_bank');
+  return BANKS[b]?b:'main';
+}
+function setBank(b){
+  if(!BANKS[b]||b===currentBank())return;
+  localStorage.setItem('dea_drill_bank',b);
+  location.reload(); // QUESTIONSの再宣言を避けるためリロードで読み直す
+}
+// 選択中バンクのquestionsを動的に読み込んでから起動
+(function loadBank(){
+  const s=document.createElement('script');
+  s.src=BANKS[currentBank()].file;
+  s.onload=function(){ if(typeof boot==='function') boot(); };
+  s.onerror=function(){ document.body.innerHTML='<p style="padding:20px;font-size:16px">問題ファイル('+BANKS[currentBank()].file+')を読み込めませんでした。python3 -m http.server 経由で開いてください。</p>'; };
+  document.head.appendChild(s);
+})();
+</script>
+<script>
+// 進捗キーはバンクごとに分ける（問題数・id体系が違うため混ぜない）
+const LS_KEY='dea_drill_progress_v1_'+currentBank();
+let state={mode:'all',list:[],idx:0,answered:false,sel:null,session:{correct:0,total:0,wrongIds:[]}};
+let progress=loadProgress();
+
+// ===== 複数選択ヘルパー（answerが数値→単一／配列→複数選択）=====
+function ansArr(q){return Array.isArray(q.answer)?q.answer.slice().sort((a,b)=>a-b):[q.answer];}
+function isMulti(q){return Array.isArray(q.answer);}
+function selArr(){return Array.isArray(state.sel)?state.sel.slice().sort((a,b)=>a-b):(state.sel==null?[]:[state.sel]);}
+function arrEq(a,b){return a.length===b.length&&a.every((v,i)=>v===b[i]);}
+function ansLabels(q){return ansArr(q).map(i=>'ABCDE'[i]).join('・');}
+
+function loadProgress(){
+  try{
+    const p=JSON.parse(localStorage.getItem(LS_KEY))||{};
+    p.seen=p.seen||{};p.wrong=p.wrong||{};
+    p.wrongCount=p.wrongCount||{};p.correctCount=p.correctCount||{};
+    p.unsure=p.unsure||{};
+    return p;
+  }catch(e){return{seen:{},wrong:{},wrongCount:{},correctCount:{},unsure:{}}}
+}
+function saveProgress(){localStorage.setItem(LS_KEY,JSON.stringify(progress))}
+function resetProgress(){
+  if(!confirm('進捗（正解・間違い履歴）を消します。よろしいですか？'))return;
+  progress={seen:{},wrong:{},wrongCount:{},correctCount:{},unsure:{}};saveProgress();renderHome();
+}
+
+// カテゴリ一覧
+function categories(){
+  const s=new Set();QUESTIONS.forEach(q=>s.add(q.cat));return[...s];
+}
+
+function renderHome(){
+  document.getElementById('cntAll').textContent=`全${QUESTIONS.length}問`;
+  const wrongCount=Object.keys(progress.wrong).filter(id=>progress.wrong[id]).length;
+  document.getElementById('cntWrong').textContent=wrongCount?`${wrongCount}問たまっています`:'まだありません';
+  const cr=document.getElementById('cntReview');if(cr)cr.textContent=wrongCount?`${wrongCount}問の解説を読む`:'まだありません';
+  const seen=Object.keys(progress.seen).length;
+  const unseen=QUESTIONS.filter(q=>!progress.seen[q.id]).length;
+  const cu=document.getElementById('cntUnseen');
+  if(cu)cu.textContent=unseen?`残り${unseen}問`:'全部やりました🎉';
+  document.getElementById('hStat').textContent=`学習済 ${seen}/${QUESTIONS.length}`;
+  document.getElementById('hBar').style.width=(seen/QUESTIONS.length*100)+'%';
+  if(!themeTab)themeTab=currentBank();
+  loadAllBanks(()=>{renderThemeGraph();updateCrossCount();renderAllBankProg();});  // 総問題数は全バンク読込後に反映
+  renderThemeGraph();
+  renderAllBankProg();
+}
+// 全セットの進捗を各バンクのlocalStorageから直接読んで一覧表示（学習/間違い＋総問題数。タップで切替）
+function renderAllBankProg(){
+  const el=document.getElementById('allBankProg'); if(!el) return;
+  let grandTotal=0, allKnown=true;
+  const rows=Object.keys(BANKS).map(b=>{
+    const p=readBankProg(b);
+    const seen=Object.keys(p.seen||{}).length;
+    const wrong=Object.keys(p.wrong||{}).filter(id=>p.wrong[id]).length;
+    // 総問題数：現在バンクはQUESTIONS、他は全バンク読込後のALLBANKSから
+    const total=(b===currentBank())?QUESTIONS.length
+      :(typeof ALLBANKS!=='undefined'&&ALLBANKS&&ALLBANKS[b]?ALLBANKS[b].length:null);
+    if(total==null) allKnown=false; else grandTotal+=total;
+    const label=(BANKS[b]&&BANKS[b].label)||b;
+    const cur=(b===currentBank());
+    const right = total!=null ? ('学習 '+seen+' / 全'+total+'問・間違い '+wrong)
+                              : ('学習 '+seen+'・間違い '+wrong);
+    return '<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 10px;font-size:14px;'+(cur?'background:#edf2f4;font-weight:700;':'')+'cursor:pointer" onclick="setBank(\''+b+'\')">'+
+      '<span style="color:#183251">'+(cur?'▶ ':'')+label+'</span>'+
+      '<span style="color:#5e5e5e">'+right+'</span></div>';
+  }).join('');
+  const head='📚 全セットの進捗'+(allKnown?'（全'+grandTotal+'問・タップで切替）':'（タップで切替）');
+  el.innerHTML='<div style="border:1px solid #c8c2b0;background:#fff;margin:0 0 14px">'+
+    '<div style="font-size:13px;font-weight:700;color:#5e5e5e;padding:8px 10px;border-bottom:1px solid #eee">'+head+'</div>'+rows+'</div>';
+}
+function updateCrossCount(){
+  const el=document.getElementById('cntCross');if(!el)return;
+  const n=collectCrossWrong('').length;
+  el.textContent=n?`全セット合計 ${n}問たまっています`:'まだありません';
+}
+
+function startMode(mode,cat){
+  state.mode=mode;
+  let list=[];
+  if(mode==='all')list=QUESTIONS.slice();
+  else if(mode==='cat')list=QUESTIONS.filter(q=>q.cat===cat);
+  else if(mode==='unseen'){
+    list=QUESTIONS.filter(q=>!progress.seen[q.id]);
+    if(!list.length){alert('全問やり切りました🎉 「間違えた問題だけ」や「全問」で復習しましょう。');return;}
+  }else if(mode==='wrong'){
+    list=QUESTIONS.filter(q=>progress.wrong[q.id]);
+    if(!list.length){alert('間違えた問題はまだありません。まず全問を解いてみましょう。');return;}
+    list.sort((a,b)=>(progress.wrongCount[b.id]||0)-(progress.wrongCount[a.id]||0));
+  }else if(mode==='shuffle'){
+    list=QUESTIONS.slice().sort(()=>Math.random()-.5).slice(0,10);
+  }
+  state.list=list;state.idx=0;
+  state.session={correct:0,total:0,wrongIds:[]};
+  show('scQuiz');document.getElementById('btnRow').style.display='flex';
+  document.getElementById('hTitle').textContent=
+    mode==='wrong'?'復習モード':mode==='cat'?cat:mode==='shuffle'?'ランダム10問':mode==='unseen'?'未学習から':'全問';
+  renderQ();
+}
+
+function renderQ(){
+  const q=state.list[state.idx];
+  state.answered=false;state.sel=isMulti(q)?[]:null;
+  if((state.mode==='weakness'||state.mode==='xwrong')&&q._bank){
+    var bankLabel=(BANKS[q._bank].label||q._bank).split('・')[0];
+    document.getElementById('qCat').textContent='['+bankLabel+'] '+q.cat;
+  }else{
+    document.getElementById('qCat').textContent=q.cat;
+  }
+  document.getElementById('qIdx').textContent=`${state.idx+1} / ${state.list.length}`;
+  let multiHint='';
+  if(isMulti(q)){const n=ansArr(q).length;multiHint=`<div class="multiHint">✓ ${n}つ選んでください（複数選択）</div>`;}
+  document.getElementById('qBody').innerHTML=multiHint+q.scenario+'<span class="ask">'+q.ask+'</span>';
+  const opts=document.getElementById('qOpts');opts.innerHTML='';
+  q.options.forEach((o,i)=>{
+    const d=document.createElement('div');d.className='opt';d.dataset.i=i;
+    d.innerHTML=`<span class="lab">${'ABCDE'[i]}</span><span class="ot">${o}</span>`;
+    d.onclick=()=>selectOpt(i);
+    opts.appendChild(d);
+  });
+  const exp=document.getElementById('qExp');exp.className='exp';exp.innerHTML='';
+  const bn=document.getElementById('btnNext');bn.textContent='解答する';bn.disabled=true;
+  window.scrollTo(0,0);
+  // progress bar = session
+  document.getElementById('hStat').textContent=`正解 ${state.session.correct}/${state.session.total}`;
+  document.getElementById('hBar').style.width=(state.idx/state.list.length*100)+'%';
+}
+
+function selectOpt(i){
+  if(state.answered)return;
+  const q=state.list[state.idx];
+  if(isMulti(q)){
+    // トグル選択。必要数を選ぶまで解答ボタン無効
+    const need=ansArr(q).length;
+    let cur=Array.isArray(state.sel)?state.sel.slice():[];
+    if(cur.includes(i))cur=cur.filter(x=>x!==i);
+    else{if(cur.length>=need)return; cur.push(i);}
+    state.sel=cur;
+    [...document.querySelectorAll('#qOpts .opt')].forEach(o=>o.classList.toggle('sel',cur.includes(+o.dataset.i)));
+    document.getElementById('btnNext').disabled=(cur.length!==need);
+  }else{
+    state.sel=i;
+    [...document.querySelectorAll('#qOpts .opt')].forEach(o=>o.classList.toggle('sel',+o.dataset.i===i));
+    document.getElementById('btnNext').disabled=false;
+  }
+}
+
+function nextQ(){
+  if(!state.answered){revealAnswer();return;}
+  state.idx++;
+  if(state.idx>=state.list.length){finish();return;}
+  if(state.idx%10===0){showBreak();return;} // 10問ごとに小休止
+  renderQ();
+}
+function showBreak(){
+  show('scBreak');document.getElementById('btnRow').style.display='none';
+  const remain=state.list.length-state.idx;
+  document.getElementById('brkMsg').textContent=`${state.idx}問おつかれさま☕`;
+  document.getElementById('brkSub').textContent=`このセッション ${state.session.correct}/${state.session.total}問正解 ・ 残り${remain}問`;
+  window.scrollTo(0,0);
+}
+function resumeQuiz(){show('scQuiz');document.getElementById('btnRow').style.display='flex';renderQ();}
+
+function revealAnswer(){
+  const q=state.list[state.idx];
+  state.answered=true;
+  const ans=ansArr(q), sel=selArr();
+  const correct=arrEq(ans,sel); // 単一・複数とも集合一致で採点
+  state.session.total++;
+  if(correct)state.session.correct++;else state.session.wrongIds.push(q.id);
+  // 記録（横断モード=xwrong では問題が属するバンクのLSへ書き戻す）
+  const tgtBank=((state.mode==='xwrong'||state.mode==='weakness')&&q._bank)?q._bank:currentBank();
+  const pr=(tgtBank===currentBank())?progress:readBankProg(tgtBank);
+  pr.seen[q.id]=true;
+  pr.wrong[q.id]=!correct; // 正解したら false に上書き（復習リストから外れる）
+  // 累計回数（裏で蓄積＝本当の弱点が見える）
+  pr.wrongCount=pr.wrongCount||{};
+  pr.correctCount=pr.correctCount||{};
+  if(correct)pr.correctCount[q.id]=(pr.correctCount[q.id]||0)+1;
+  else pr.wrongCount[q.id]=(pr.wrongCount[q.id]||0)+1;
+  if(tgtBank===currentBank())saveProgress();
+  else writeBankProg(tgtBank,pr);
+  // 選択肢色付け（正解＝緑／選んだが不正解＝赤）
+  [...document.querySelectorAll('#qOpts .opt')].forEach(o=>{
+    const oi=+o.dataset.i;o.classList.add('disabled');o.onclick=null;
+    if(ans.includes(oi))o.classList.add('correct');
+    else if(sel.includes(oi))o.classList.add('wrong');
+  });
+  // 解説
+  const exp=document.getElementById('qExp');exp.className='exp on';
+  let elim='';
+  if(q.elim){elim='<div class="elim"><b>消去法：</b>'+q.elim+'</div>';}
+  // 用語ミニ辞典（問題文の業界用語・略語）
+  let terms='';
+  if(q.terms){
+    let rows=q.terms.map(t=>'<div class="termrow"><b>'+t.t+'</b>：'+t.d+'</div>').join('');
+    terms='<div class="h">📖 出てきた用語</div><div class="termbox">'+rows+'</div>';
+  }
+  // 間違えやすいペア
+  let conf='';
+  if(q.confusion){
+    let confBody;
+    if(Array.isArray(q.confusion)){
+      // v3形式：{a,b,d} の対比ペア配列
+      confBody=q.confusion.map(c=>
+        '<div class="confpair"><div class="confvs"><b>'+c.a+'</b> ⇔ <b>'+c.b+'</b></div><div class="confd">'+c.d+'</div></div>'
+      ).join('');
+    }else{
+      // 旧形式：HTML文字列
+      confBody=q.confusion;
+    }
+    conf='<div class="confbox"><div class="confh">⚡ 混同注意</div>'+confBody+'</div>';
+  }
+  let more='';
+  if(q.deep){more='<button class="moreBtn" id="moreBtn" onclick="toggleDeep()">🔍 もっと詳しく（なぜ？）</button>'+
+    '<div class="deep" id="deepBox">'+q.deep+'</div>';}
+  // アーキ図ドリルへのリンク（pattern が設定された問題のみ）
+  let patternLink='';
+  if(q.pattern){patternLink="";}
+  // 自信がなかった（正解でも復習に入れる）。不正解は既に復習対象なので出さない
+  let unsureBtn='';
+  if(correct){unsureBtn='<button class="unsureBtn" id="unsureBtn" onclick="markUnsure('+q.id+')">🤔 自信がなかった（復習に入れる）</button>';}
+  const aiBtn='<button class="promptBtn" onclick="copyAIPrompt('+state.idx+')">🤖 この問題をAIに相談する（コピー）</button>'+
+    '<div class="promptHint">問題・選択肢・正解＋「各選択肢がなぜ正解／誤答か初心者向けに解説して」という指示をコピーします。ChatGPTやClaudeに貼り付けて、納得いくまで質問できます。<br>相談した問題は「自信なし」として復習リストに追加されます。</div>';
+  // 正解＝記号＋正解選択肢の文章（複数選択は全て列挙）
+  const ansFull=ansArr(q).map(i=>`<div class="ansfull"><span class="anslab">正解 ${'ABCDE'[i]}</span> ${stripTags(q.options[i])}</div>`).join('');
+  exp.innerHTML=
+    `<div class="verdict ${correct?'ok':'ng'}">${correct?'◯ 正解':'✕ 不正解'}</div>`+
+    ansFull+
+    `<div class="h">本当に聞かれていたこと</div>${q.keypoint}`+
+    `<div class="h">なぜこれが正解か</div>${q.explain}`+
+    elim+conf+terms+more+patternLink+zukaiLink(q)+unsureBtn+aiBtn;
+  document.getElementById('btnNext').textContent=
+    state.idx+1>=state.list.length?'結果を見る':'次の問題 →';
+  document.getElementById('hStat').textContent=`正解 ${state.session.correct}/${state.session.total}`;
+  // 解説までスクロール
+  setTimeout(()=>{exp.scrollIntoView({behavior:'smooth',block:'start'});},120);
+}
+
+function finish(){
+  show('scResult');document.getElementById('btnRow').style.display='none';
+  document.getElementById('hTitle').textContent='結果';
+  const c=state.session.correct,t=state.session.total;
+  const pct=t?Math.round(c/t*100):0;
+  document.getElementById('rScore').textContent=pct+'%';
+  document.getElementById('rMeta').textContent=`${t}問中 ${c}問正解`;
+  let msg='';
+  if(pct>=80)msg='本番ライン（7割）超え。この調子。';
+  else if(pct>=70)msg='合格ラインに乗ってきた。間違えた所を復習へ。';
+  else msg='まだ伸びしろ。解説を読んで「読み方の型」を意識して。';
+  document.getElementById('rMsg').textContent=msg;
+  const rv=document.getElementById('rReview');rv.innerHTML='';
+  if(state.session.wrongIds.length){
+    rv.innerHTML='<h3 style="font-size:15px;color:var(--sub);margin:18px 0 8px">間違えた問題</h3>';
+    state.session.wrongIds.forEach(id=>{
+      const q=state.list.find(x=>x.id===id)||QUESTIONS.find(x=>x.id===id);
+      if(!q)return;
+      const tgt=((state.mode==='xwrong'||state.mode==='weakness')&&q._bank)?bankProgFor(q._bank):progress;
+      const wc=(tgt.wrongCount&&tgt.wrongCount[id])||0;
+      const badge=wc>=2?` <span style="color:var(--ng)">✕${wc}回目</span>`:'';
+      const d=document.createElement('div');d.className='ritem';
+      d.innerHTML=`<div class="rc">${q.cat}${badge}</div>${q.ask}`;
+      rv.appendChild(d);
+    });
+  }
+  // 弱点特訓モード追加表示
+  if(state.mode==='weakness'){
+    var overcomeCount=0;
+    if(window._weakWrongBefore){
+      state.list.forEach(function(q){
+        var key=q._bank+'|'+q.id;
+        if(window._weakWrongBefore[key]){
+          var pr=bankProgFor(q._bank);
+          if(!pr.wrong[q.id])overcomeCount++;
+        }
+      });
+    }
+    var extra='<div style="margin-top:18px;padding:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;text-align:center">'+
+      '<div style="font-size:17px;font-weight:700;color:var(--ok);margin-bottom:6px">✅ 克服した問題: '+overcomeCount+' 問</div>'+
+      '<div style="font-size:14px;color:var(--sub)">正解して「間違えた問題」から外れた数</div></div>'+
+      '<div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">'+
+      '<button class="btn primary" onclick="openWeakness()">次の弱点特訓</button>'+
+      '<button class="btn ghost" onclick="goHome()">ホームに戻る</button></div>';
+    rv.insertAdjacentHTML('beforeend',extra);
+  }
+  renderHome();
+}
+
+function toggleDeep(){
+  const box=document.getElementById('deepBox');const btn=document.getElementById('moreBtn');
+  if(!box)return;
+  const open=box.classList.toggle('on');
+  btn.textContent=open?'🔼 閉じる':'🔍 もっと詳しく（なぜ？）';
+}
+
+// HTMLタグ・装飾を落としてプレーンテキスト化
+function stripTags(s){
+  return (s||'').replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+}
+
+// この問題をAIに相談するためのプロンプトを組み立ててコピー
+function buildAIPrompt(q){
+  const labels='ABCDE';
+  let opts=q.options.map((o,i)=>`${labels[i]}. ${stripTags(o)}`).join('\n');
+  return [
+'あなたはAWS認定データエンジニア アソシエイト（DEA-C01）の講師です。',
+'AWS初心者の私が、下のDEA風の問題を「なぜその答えになるのか」まで腹落ちできるように解説してください。',
+'',
+'【お願い】',
+'1. まず、この問題が結局「何を問うているのか」を一文で。',
+'2. 正解の選択肢が、なぜこの状況に最も合うのかを、初心者にもわかる言葉（できればたとえ話）で。',
+'3. 他の選択肢が、それぞれ「なぜダメか／どういう時なら正解になるか」を1つずつ。ただ間違いと言うのでなく、紛らわしいポイントを明かしてください。',
+'4. 出てくるAWSサービスや用語は、正式名称と「ざっくり何をするものか」をセットで。略語は何の略かも。',
+'5. 最後に、本番で似た問題を見たとき一発で見抜くための「キーワードと判断のコツ」を一言。',
+'専門用語をいきなり使わず、必要なら噛み砕いてください。',
+'',
+'==== 問題 ====',
+stripTags(q.scenario),
+'',
+'問い: '+stripTags(q.ask),
+'',
+'選択肢:',
+opts,
+'',
+'正解: '+ansLabels(q),
+'（テーマ: '+q.cat+'）'
+  ].join('\n');
+}
+
+function markUnsure(id,silent){
+  // 「自信がなかった」＝正解でも復習プールに入れる（横断モードは問題のバンクへ）
+  const xq=state.list.find(x=>x.id===id);
+  const tgtBank=((state.mode==='xwrong'||state.mode==='weakness')&&xq&&xq._bank)?xq._bank:currentBank();
+  const pr=(tgtBank===currentBank())?progress:readBankProg(tgtBank);
+  pr.wrong[id]=true;
+  pr.unsure=pr.unsure||{};
+  pr.unsure[id]=true;
+  if(tgtBank===currentBank())saveProgress();
+  else writeBankProg(tgtBank,pr);
+  const b=document.getElementById('unsureBtn');
+  if(b){b.textContent='✓ 復習に入れました';b.classList.add('done');b.disabled=true;}
+  if(!silent)showToast('🤔 自信なしとして復習リストに追加しました');
+}
+
+function copyAIPrompt(idx){
+  const q=state.list[idx];
+  if(!q)return;
+  // AIに相談＝自信がなかったとみなし復習に追加（正解でも）
+  markUnsure(q.id,true);
+  const text=buildAIPrompt(q);
+  const done=()=>showToast('📋 コピーしました。AIに貼り付けて相談できます（自信なしとして復習に追加）');
+  const fail=()=>{
+    // フォールバック: テキストエリア経由
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.focus();ta.select();
+      document.execCommand('copy');document.body.removeChild(ta);
+      done();
+    }catch(e){
+      // 最終手段: 全選択して見せる
+      window.prompt('下のテキストを長押しでコピーして、AIに貼り付けてください', text);
+    }
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(fail);
+  }else{fail();}
+}
+
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById('toast');if(!t)return;
+  t.textContent=msg;t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('on'),2600);
+}
+
+/* ===== 聞き流しモード ===== */
+const synth=window.speechSynthesis;
+let jaVoice=null;
+let listen={on:false,list:[],idx:0,steps:[],step:0,paused:false,token:0,wakeLock:null};
+
+function pickJaVoice(){
+  if(!synth)return;
+  const vs=synth.getVoices();
+  jaVoice=vs.find(v=>/ja-JP|ja_JP|^ja\b/i.test(v.lang))||vs.find(v=>/Japanese|日本/i.test(v.name))||null;
+}
+if(synth){
+  pickJaVoice();
+  if(typeof synth.onvoiceschanged!=='undefined'){synth.onvoiceschanged=pickJaVoice;}
+}
+
+async function requestWake(){
+  try{
+    if('wakeLock' in navigator){
+      listen.wakeLock=await navigator.wakeLock.request('screen');
+      listen.wakeLock.addEventListener&&listen.wakeLock.addEventListener('release',()=>{});
+    }
+  }catch(e){/* 取れなくても続行 */}
+}
+function releaseWake(){
+  try{if(listen.wakeLock){listen.wakeLock.release();listen.wakeLock=null;}}catch(e){}
+}
+// 画面復帰時にWake Lockを取り直す
+document.addEventListener('visibilitychange',()=>{
+  if(listen.on && !listen.paused && document.visibilityState==='visible'){requestWake();}
+});
+
+function startListen(){
+  if(!synth){alert('この端末は読み上げに対応していません。Chromeでお試しください。');return;}
+  listen.on=true;listen.paused=false;listen.token++;
+  listen.list=QUESTIONS.slice().sort(()=>Math.random()-.5);
+  listen.idx=0;
+  show('scListen');
+  document.getElementById('btnRow').style.display='none';
+  document.getElementById('listenBar').style.display='flex';
+  document.getElementById('hTitle').textContent='聞き流し';
+  requestWake();
+  renderListenQ();
+  playListenQ();
+}
+
+function renderListenQ(){
+  const q=listen.list[listen.idx];
+  document.getElementById('lStage').textContent='テーマ：'+q.cat;
+  document.getElementById('lQno').textContent=(listen.idx+1)+' / '+listen.list.length+' 問目';
+  document.getElementById('lScenario').innerHTML=q.scenario+'<span class="ask">'+q.ask+'</span>';
+  const opts=document.getElementById('lOpts');opts.innerHTML='';
+  q.options.forEach((o,i)=>{
+    const d=document.createElement('div');d.className='listenOpt';d.dataset.i=i;
+    d.innerHTML='<span class="lab">'+'ABCDE'[i]+'</span><span>'+o+'</span>';
+    opts.appendChild(d);
+  });
+  document.getElementById('lThinking').className='listenThinking';
+  const why=document.getElementById('lWhy');why.className='listenWhy';why.innerHTML='';
+  document.getElementById('hStat').textContent='';
+  document.getElementById('hBar').style.width=(listen.idx/listen.list.length*100)+'%';
+  window.scrollTo(0,0);
+}
+
+// 1問分の読み上げ「セリフ」列を組み立てて順番に再生
+function playListenQ(){
+  const q=listen.list[listen.idx];
+  const labels='ABCDE';
+  const myToken=listen.token;
+  // セリフ列（text + 前に置く待ち時間ms + 実行する画面処理）
+  const seq=[];
+  seq.push({t:'第'+(listen.idx+1)+'問。テーマは'+q.cat+'。'});
+  seq.push({t:stripTags(q.scenario)});
+  seq.push({t:'問題。'+stripTags(q.ask)+(isMulti(q)?' '+ansArr(q).length+'つ選びます。':'')});
+  q.options.forEach((o,i)=>{ seq.push({t:labels[i]+'、'+stripTags(o)+'。'}); });
+  seq.push({t:'では、考えてみてください。',before:0,fn:()=>{document.getElementById('lThinking').className='listenThinking on';}});
+  seq.push({t:'',before:4500}); // 考える間（無音）
+  seq.push({t:'正解は、'+ansLabels(q)+'。',before:0,fn:()=>{
+    document.getElementById('lThinking').className='listenThinking';
+    const ans=ansArr(q);
+    [...document.querySelectorAll('#lOpts .listenOpt')].forEach(el=>{
+      if(ans.includes(+el.dataset.i))el.classList.add('ans');
+    });
+    // 進捗記録（聞いた＝seen、正解扱いにはしない）
+    progress.seen[q.id]=true;saveProgress();
+  }});
+  seq.push({t:'理由。'+stripTags(q.keypoint),before:300,fn:()=>{
+    const why=document.getElementById('lWhy');why.className='listenWhy on';
+    why.innerHTML='<div class="h">本当に聞かれていたこと</div>'+q.keypoint+
+      '<div class="h">なぜこれが正解か</div>'+q.explain;
+  }});
+  seq.push({t:stripTags(q.explain)});
+  seq.push({t:'',before:1200}); // 余韻
+  seq.push({t:'次の問題へ。',before:600,fn:()=>{}});
+  seq.push({t:'',before:1500,fn:()=>{
+    // 次の問題へ
+    listen.idx++;
+    if(listen.idx>=listen.list.length){listen.idx=0;listen.list.sort(()=>Math.random()-.5);}
+    renderListenQ();
+    playListenQ();
+  }});
+  runSeq(seq,0,myToken);
+}
+
+// セリフ列を順に再生（細切れ＝Android Chromeの長文打ち切り対策）
+function runSeq(seq,i,myToken){
+  if(!listen.on||myToken!==listen.token)return; // 中断/リスタート検知
+  if(listen.paused){ // 一時停止中は待つ
+    setTimeout(()=>runSeq(seq,i,myToken),300);return;
+  }
+  if(i>=seq.length)return;
+  const step=seq[i];
+  const go=()=>{
+    if(!listen.on||myToken!==listen.token)return;
+    if(step.fn)step.fn();
+    if(step.t){
+      speakChunks(stripTags(step.t),myToken,()=>runSeq(seq,i+1,myToken));
+    }else{
+      runSeq(seq,i+1,myToken);
+    }
+  };
+  if(step.before){setTimeout(go,step.before);}else{go();}
+}
+
+// 1つのテキストを「。」で割って連続再生（長文打ち切り回避）
+function speakChunks(text,myToken,done){
+  if(!text){done&&done();return;}
+  // 「。」の後で分割（後読み非対応の端末でも動くようマーカー方式）
+  const parts=text.replace(/。/g,'。\u0001').split('\u0001').map(s=>s.trim()).filter(Boolean);
+  if(!parts.length){done&&done();return;}
+  let k=0;
+  const next=()=>{
+    if(!listen.on||myToken!==listen.token)return;
+    if(listen.paused){setTimeout(next,300);return;}
+    if(k>=parts.length){done&&done();return;}
+    const u=new SpeechSynthesisUtterance(parts[k]);
+    if(jaVoice)u.voice=jaVoice;
+    u.lang='ja-JP';u.rate=1.0;u.pitch=1.0;
+    u.onend=()=>{k++;next();};
+    u.onerror=()=>{k++;next();};
+    try{synth.speak(u);}catch(e){k++;next();}
+  };
+  next();
+}
+
+// 画面タップ→今の問題を最初から
+function listenReplay(){
+  if(!listen.on)return;
+  listen.token++;          // 進行中シーケンスを無効化
+  listen.paused=false;
+  document.getElementById('listenPause').textContent='⏸ 一時停止';
+  try{synth.cancel();}catch(e){}
+  renderListenQ();
+  // cancel直後のAndroidの取りこぼし対策で少し待つ
+  setTimeout(()=>playListenQ(),200);
+  showToast('🔁 この問題を最初から');
+}
+
+function listenTogglePause(){
+  if(!listen.on)return;
+  listen.paused=!listen.paused;
+  const b=document.getElementById('listenPause');
+  if(listen.paused){
+    b.textContent='▶ 再開';
+    try{synth.pause();}catch(e){}
+    try{synth.cancel();}catch(e){} // Androidはpauseが効かない端末があるのでcancel併用
+    // cancelした場合は今の問題を頭から（位置保持は諦め、確実に動く方を取る）
+    listen._resumeReplay=true;
+  }else{
+    b.textContent='⏸ 一時停止';
+    if(listen._resumeReplay){listen._resumeReplay=false;listenReplay();}
+    else{try{synth.resume();}catch(e){}}
+  }
+}
+
+function stopListen(){
+  listen.on=false;listen.token++;
+  try{synth.cancel();}catch(e){}
+  releaseWake();
+  document.getElementById('listenBar').style.display='none';
+  goHome();
+}
+
+function goHome(){show('scHome');document.getElementById('btnRow').style.display='none';document.getElementById('listenBar').style.display='none';document.getElementById('hTitle').textContent='DEA ドリル';renderHome();}
+
+/* ===== 全セット横断で間違いを解き直すモード（採点は各問のバンクへ書き戻す） ===== */
+// 全バンクから wrong の問題を集める。各問に _bank と _wc を付与し、cat で絞れる。
+function collectCrossWrong(catFilter){
+  const out=[];
+  Object.keys(BANKS).forEach(b=>{
+    const arr=ALLBANKS[b]||[];
+    const pr=bankProgFor(b);
+    arr.forEach(q=>{
+      if(pr.wrong&&pr.wrong[q.id]){
+        if(catFilter&&q.cat!==catFilter)return;
+        const wc=(pr.wrongCount&&pr.wrongCount[q.id])||0;
+        out.push(Object.assign({},q,{_bank:b,_wc:wc}));
+      }
+    });
+  });
+  out.sort((a,b)=>(b._wc||0)-(a._wc||0));
+  return out;
+}
+function openCrossWrong(){
+  showToast('⏳ 全セットの間違いを集計中…');
+  loadAllBanks(()=>renderCrossPick());
+}
+function renderCrossPick(){
+  const all=collectCrossWrong('');
+  const wrap=document.getElementById('xpickWrap');
+  if(!all.length){wrap.innerHTML='<p style="font-size:16px;color:var(--sub)">全セットを通して、間違いプールは空です🎉 まず問題を解いてみましょう。</p>';show('scXpick');document.getElementById('hTitle').textContent='横断で間違いを解き直す';return;}
+  // 分野ごとに件数集計（多い順）
+  const byCat={};all.forEach(q=>{byCat[q.cat]=(byCat[q.cat]||0)+1;});
+  const cats=Object.keys(byCat).sort((a,b)=>byCat[b]-byCat[a]);
+  let html='<div class="xchip xall" onclick="startCross(\'\')">🌐 全分野 <b>'+all.length+'問</b></div>';
+  html+=cats.map(c=>'<div class="xchip" onclick="startCross(\''+c.replace(/'/g,"\\'")+'\')">'+c+' <b>'+byCat[c]+'問</b></div>').join('');
+  wrap.innerHTML=html;
+  show('scXpick');document.getElementById('hTitle').textContent='横断で間違いを解き直す';
+}
+function startCross(cat){
+  const list=collectCrossWrong(cat);
+  if(!list.length){alert('この分野の間違いはありません。');return;}
+  state.mode='xwrong';
+  state.list=list;state.idx=0;
+  state.session={correct:0,total:0,wrongIds:[]};
+  show('scQuiz');document.getElementById('btnRow').style.display='flex';
+  document.getElementById('hTitle').textContent='横断復習：'+(cat||'全分野');
+  renderQ();
+}
+
+/* ===== 間違いの解説を読むモード（解かずに弱点の解説だけ読む） ===== */
+let reviewState={list:[],idx:0};
+function startReview(){
+  const list=QUESTIONS.filter(q=>progress.wrong[q.id])
+    .sort((a,b)=>((progress.wrongCount&&progress.wrongCount[b.id])||0)-((progress.wrongCount&&progress.wrongCount[a.id])||0));
+  if(!list.length){alert('間違えた問題はまだありません。まず問題を解いてみましょう。');return;}
+  reviewState={list,idx:0};
+  show('scReview');document.getElementById('btnRow').style.display='none';
+  document.getElementById('hTitle').textContent='間違いの解説を読む';
+  renderReview();
+}
+// カテゴリ → 図解(network-zukai.html)のアンカー
+const CAT2ZUKAI={
+  'コンピュート・コンテナ':'compute','サーバーレス':'compute',
+  'データベース':'database','目的別データベース':'database',
+  'ストレージ移行':'storage-migration','ストレージ':'storage-migration','ストレージ深掘り':'storage-migration',
+  'ネットワーク深掘り':'vpc','配信/CDN':'cdn',
+  'データ分析':'data-analytics',
+  '疎結合':'messaging','アプリ統合・疎結合':'messaging',
+  '高性能':'performance','コンピュート・高性能':'performance',
+  'DR戦略':'dr','高可用DR':'dr','可用性':'dr',
+  'セキュリティ':'security','セキュリティ深掘り':'security'
+};
+function zukaiLink(q){
+  const a=CAT2ZUKAI[q.cat];
+  if(!a)return '';
+  return "";
+}
+function buildExpReadonly(q){
+  const ans=ansArr(q);
+  const ansFull=ans.map(i=>`<div class="ansfull"><span class="anslab">正解 ${'ABCDE'[i]}</span> ${stripTags(q.options[i])}</div>`).join('');
+  let elim=q.elim?'<div class="elim"><b>消去法：</b>'+q.elim+'</div>':'';
+  let terms='';
+  if(q.terms){const rows=q.terms.map(t=>'<div class="termrow"><b>'+t.t+'</b>：'+t.d+'</div>').join('');terms='<div class="h">📖 出てきた用語</div><div class="termbox">'+rows+'</div>';}
+  let conf='';
+  if(q.confusion){let cb;if(Array.isArray(q.confusion)){cb=q.confusion.map(c=>'<div class="confpair"><div class="confvs"><b>'+c.a+'</b> ⇔ <b>'+c.b+'</b></div><div class="confd">'+c.d+'</div></div>').join('');}else cb=q.confusion;conf='<div class="confbox"><div class="confh">⚡ 混同注意</div>'+cb+'</div>';}
+  let more=q.deep?'<button class="moreBtn" id="moreBtn" onclick="toggleDeep()">🔍 もっと詳しく（なぜ？）</button><div class="deep" id="deepBox">'+q.deep+'</div>':'';
+  let patternLink="";
+  const wc=(progress.wrongCount&&progress.wrongCount[q.id])||0;
+  let wcBadge='';
+  if(wc>0)wcBadge='<div class="verdict ng">✕ 間違えた'+(wc>=2?'（'+wc+'回）':'')+'</div>';
+  else if(progress.unsure&&progress.unsure[q.id])wcBadge='<div class="verdict" style="background:#e0a52e;color:#fff">🤔 正解したが自信なし／AIに相談</div>';
+  return wcBadge+ansFull
+    +`<div class="h">本当に聞かれていたこと</div>${q.keypoint}`
+    +`<div class="h">なぜこれが正解か</div>${q.explain}`
+    +elim+conf+terms+more+patternLink+zukaiLink(q);
+}
+function renderReview(){
+  const q=reviewState.list[reviewState.idx];if(!q){goHome();return;}
+  document.getElementById('rvCat').textContent=q.cat;
+  document.getElementById('rvIdx').textContent=`${reviewState.idx+1} / ${reviewState.list.length}`;
+  const multiHint=isMulti(q)?`<div class="multiHint">✓ ${ansArr(q).length}つ選ぶ問題（複数選択）</div>`:'';
+  document.getElementById('rvBody').innerHTML=multiHint+q.scenario+'<span class="ask">'+q.ask+'</span>';
+  const ans=ansArr(q);
+  const opts=document.getElementById('rvOpts');opts.innerHTML='';
+  q.options.forEach((o,i)=>{
+    const d=document.createElement('div');d.className='opt';
+    d.innerHTML=`<span class="lab">${'ABCDE'[i]}</span><span class="ot">${o}</span>`;
+    opts.appendChild(d);
+  });
+  document.getElementById('rvExp').innerHTML=buildExpReadonly(q);
+  window.scrollTo(0,0);
+}
+function reviewGo(d){
+  if(!reviewState.list.length)return;
+  reviewState.idx=(reviewState.idx+d+reviewState.list.length)%reviewState.list.length;
+  renderReview();
+}
+function reviewClear(){
+  const q=reviewState.list[reviewState.idx];if(!q)return;
+  progress.wrong[q.id]=false;saveProgress();
+  reviewState.list.splice(reviewState.idx,1);
+  if(!reviewState.list.length){alert('間違いプールの解説をすべて読み終えました🎉');goHome();return;}
+  if(reviewState.idx>=reviewState.list.length)reviewState.idx=reviewState.list.length-1;
+  renderReview();
+}
+
+/* ===== 弱点をAIに相談するプロンプト生成 ===== */
+// 全バンクの問題を一度だけfetch+評価してキャッシュ
+let ALLBANKS=null,ALLREADY=false,ALLLOADING=false;const ALLCBS=[];
+// 全バンクの問題を <script> タグで逐次読み込みしてキャッシュ。
+// fetch を使わないので file:// でも GitHub Pages でも動く（fetchはfile://だとCORSでブロックされる）。
+function loadAllBanks(cb){
+  if(ALLREADY){cb&&cb();return;}
+  if(cb)ALLCBS.push(cb);
+  if(ALLLOADING)return;
+  ALLLOADING=true;ALLBANKS={};
+  const cur=currentBank();
+  const curQ=(typeof QUESTIONS!=='undefined')?QUESTIONS:[];
+  ALLBANKS[cur]=curQ;                                   // 現在バンクはロード済み。先に退避
+  const keys=Object.keys(BANKS).filter(b=>b!==cur);     // 残りを順番に読む
+  let i=0;
+  (function next(){
+    if(i>=keys.length){
+      try{QUESTIONS=curQ;}catch(e){}                    // script読込で上書きされた現在バンクを復元
+      ALLREADY=true;ALLLOADING=false;ALLCBS.splice(0).forEach(f=>f());
+      return;
+    }
+    const b=keys[i++];
+    const s=document.createElement('script');
+    s.src=BANKS[b].file;
+    s.onload=function(){try{ALLBANKS[b]=QUESTIONS;}catch(e){ALLBANKS[b]=[];}next();};
+    s.onerror=function(){ALLBANKS[b]=[];next();};
+    document.head.appendChild(s);
+  })();
+}
+function bankProgFor(b){return b===currentBank()?progress:readBankProg(b);}
+function buildWeaknessPrompt(){
+  // 全セット(A〜D)横断
+  let total=0,seen=0,seenCorrect=0;
+  const cats={};const wrongAll=[];
+  Object.keys(BANKS).forEach(b=>{
+    const arr=ALLBANKS[b]||[];const pr=bankProgFor(b);const label=(BANKS[b].label||b).split('・')[0];
+    arr.forEach(q=>{
+      total++;
+      const isSeen=pr.seen&&pr.seen[q.id];
+      const isWrong=pr.wrong&&pr.wrong[q.id];
+      cats[q.cat]=cats[q.cat]||{n:0,seen:0,cor:0};cats[q.cat].n++;
+      if(isSeen){seen++;cats[q.cat].seen++;if(!isWrong)seenCorrect++,cats[q.cat].cor++;}
+      if(isWrong){const wc=(pr.wrongCount&&pr.wrongCount[q.id])||0;wrongAll.push({bank:label,q,wc});}
+    });
+  });
+  const rate=seen?Math.round(seenCorrect/seen*100):0;
+  const catRows=Object.keys(cats).map(c=>({c,...cats[c],rate:cats[c].seen?Math.round(cats[c].cor/cats[c].seen*100):null}))
+    .sort((a,b)=>{if(a.rate===null)return 1;if(b.rate===null)return -1;return a.rate-b.rate;});
+  const mistakes=wrongAll.filter(w=>w.wc>0).sort((a,b)=>b.wc-a.wc);
+  const unsures=wrongAll.filter(w=>w.wc===0);
+  let s='あなたはAWS認定データエンジニア アソシエイト(DEA-C01)の学習コーチです。以下は私のドリル学習の記録（全セット横断）です。(1)特に弱い分野トップ3 (2)間違えた問題に共通するつまずきのパターン (3)次にやるべき具体的な復習アクション を、初心者にもわかる日本語で教えてください。なお問題は「実際に間違えた」ものと「正解したが自信がなかった/AIに相談した」ものを分けてあります。\n\n';
+  s+='【全体】全'+total+'問中 学習済'+seen+'問 / 解いた問題の正答率(いま正解状態の割合)='+rate+'%\n\n';
+  s+='【分野別の正答率（弱い順・全セット合算）】\n';
+  catRows.forEach(x=>{s+='- '+x.c+'：'+(x.rate===null?'未着手':x.seen+'問中'+x.cor+'問正解（'+x.rate+'%）')+'（全'+x.n+'問）\n';});
+  const fmt=(w,i)=>{const q=w.q;const cards=(q.cards||[]).join('・');
+    return (i+1)+'. ['+w.bank+'/'+q.cat+']'+(w.wc>=2?' ✕'+w.wc+'回':'')+' 問われたこと: '+stripTags(q.ask||'')+' / 決め手: '+stripTags(q.keypoint||'')+(cards?' / 関連: '+cards:'')+'\n';};
+  s+='\n【A. 実際に間違えた問題（'+mistakes.length+'問・間違い回数つき）＝最優先】\n';
+  mistakes.forEach((w,i)=>{s+=fmt(w,i);});
+  s+='\n【B. 正解したが自信がなかった/AIに相談した問題（'+unsures.length+'問）＝理解の確認用】\n';
+  unsures.forEach((w,i)=>{s+=fmt(w,i);});
+  return s;
+}
+function copyWeakness(){
+  showToast('⏳ 全セットを集計中…');
+  loadAllBanks(()=>{
+    const text=buildWeaknessPrompt();
+    const done=()=>showToast('📋 弱点相談プロンプトをコピー。Claude等に貼り付けてください');
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(()=>weakFallback(text,done));
+    }else weakFallback(text,done);
+  });
+}
+function weakFallback(text,done){
+  const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');done&&done();}catch(e){showToast('コピーできませんでした。長押しで選択してください');}
+  document.body.removeChild(ta);
+}
+
+/* ===== 弱点特訓モード ===== */
+function detectWeak(){
+  try{
+    const rows=computeThemeRows('__all');
+    if(!rows||!rows.length)return [];
+    // poolCount: 各カテゴリに属する問題の総数（全バンク横断）
+    const poolMap={};
+    Object.keys(BANKS).forEach(b=>{
+      (ALLBANKS[b]||[]).forEach(q=>{poolMap[q.cat]=(poolMap[q.cat]||0)+1;});
+    });
+    return rows
+      .filter(r=>r.seen>=5&&(r.red+r.yellow)/r.seen>=0.4)
+      .map(r=>({cat:r.c,seen:r.seen,red:r.red,yellow:r.yellow,green:r.green,
+        missRate:Math.round((r.red+r.yellow)/r.seen*100)/100,
+        poolCount:poolMap[r.c]||0,enabled:true}))
+      .sort((a,b)=>b.missRate-a.missRate);
+  }catch(e){return [];}
+}
+
+function buildWeaknessPool(weakCats){
+  const enabledSet=new Set(weakCats.filter(c=>c.enabled).map(c=>c.cat));
+  const disabledSet=new Set(weakCats.filter(c=>!c.enabled).map(c=>c.cat));
+  const missRateMap={};
+  weakCats.forEach(c=>{missRateMap[c.cat]=c.missRate;});
+  const seen=new Set();
+  const out=[];
+  Object.keys(BANKS).forEach(b=>{
+    const arr=ALLBANKS[b]||[];
+    const pr=bankProgFor(b);
+    arr.forEach(q=>{
+      if(disabledSet.has(q.cat))return;
+      const key=b+'|'+q.id;
+      if(seen.has(key))return;
+      const wc=(pr.wrongCount&&pr.wrongCount[q.id])||0;
+      const isUnsure=!!(pr.unsure&&pr.unsure[q.id]);
+      const isWrong=!!(pr.wrong&&pr.wrong[q.id]);
+      const isSeen=!!(pr.seen&&pr.seen[q.id]);
+      const inEnabledWeak=enabledSet.has(q.cat)&&isSeen;
+      if(inEnabledWeak||wc>=2||isUnsure){
+        seen.add(key);
+        const catMissRate=missRateMap[q.cat]||0;
+        out.push(Object.assign({},q,{_bank:b,_wc:wc,_unsure:isUnsure,_wrong:isWrong,_missRate:catMissRate}));
+      }
+    });
+  });
+  return out;
+}
+
+function sortAndCap(pool){
+  pool.sort(function(a,b){
+    if(b._wc!==a._wc)return b._wc-a._wc;
+    if(b._unsure!==a._unsure)return b._unsure?1:-1;
+    if(b._wrong!==a._wrong)return b._wrong?1:-1;
+    if(b._missRate!==a._missRate)return b._missRate-a._missRate;
+    return Math.random()-0.5;
+  });
+  return pool.slice(0,20);
+}
+
+function openWeakness(){
+  showToast('⏳ 弱点を分析中…');
+  loadAllBanks(function(){
+    var weakCats=detectWeak();
+    if(!weakCats.length){
+      var pool=buildWeaknessPool([]);
+      if(!pool.length){
+        showToast('弱点はありません🎉');
+        return;
+      }
+    }
+    window._weakCats=weakCats;
+    renderWeakConfirm();
+  });
+}
+
+function renderWeakConfirm(){
+  var cats=window._weakCats;
+  var wrap=document.getElementById('weakChips');
+  wrap.innerHTML=cats.map(function(c,i){
+    return '<div class="wchip on" data-i="'+i+'" onclick="toggleWeakChip('+i+')">'+
+      '<span class="wchip-name">'+c.cat+'</span>'+
+      '<span class="wchip-rate">'+Math.round(c.missRate*100)+'%</span>'+
+      '<span class="wchip-cnt">'+c.poolCount+'問</span></div>';
+  }).join('');
+  updateWeakCount();
+  show('scWeakConfirm');
+  document.getElementById('btnRow').style.display='none';
+  document.getElementById('hTitle').textContent='🔥 弱点特訓';
+}
+
+function toggleWeakChip(i){
+  window._weakCats[i].enabled=!window._weakCats[i].enabled;
+  var chips=document.querySelectorAll('#weakChips .wchip');
+  chips[i].classList.toggle('on',window._weakCats[i].enabled);
+  updateWeakCount();
+}
+
+function updateWeakCount(){
+  var pool=buildWeaknessPool(window._weakCats);
+  var n=Math.min(pool.length,20);
+  var btn=document.getElementById('weakStartBtn');
+  btn.textContent='この '+n+' 問で開始';
+  btn.disabled=(n===0);
+}
+
+function startWeakness(){
+  var pool=buildWeaknessPool(window._weakCats);
+  var list=sortAndCap(pool);
+  if(!list.length){showToast('対象の問題がありません');return;}
+  // Record which questions were wrong before session (for "克服" count at result)
+  window._weakWrongBefore={};
+  list.forEach(function(q){if(q._wrong)window._weakWrongBefore[q._bank+'|'+q.id]=true;});
+  state.mode='weakness';
+  state.list=list;
+  state.idx=0;
+  state.session={correct:0,total:0,wrongIds:[]};
+  show('scQuiz');
+  document.getElementById('btnRow').style.display='flex';
+  document.getElementById('hTitle').textContent='弱点特訓';
+  renderQ();
+}
+
+/* ===== テーマ別 正答率グラフ（V1〜V4タブ＋全体） ===== */
+let themeTab=null;
+// DEA 5カテゴリ→表示名マッピング（集約なし・DEA-C01ドメイン）
+const THEME_GROUP={
+  '取り込み・ストリーミング':'🌊 取り込み・ストリーミング',
+  '変換・ETL':'🔧 変換・ETL',
+  'データストア・モデリング':'🗃️ データストア・モデリング',
+  '運用・オーケストレーション':'⚙️ 運用・オーケストレーション',
+  'セキュリティ・ガバナンス':'🛡️ セキュリティ・ガバナンス'
+};
+function groupThemeRows(rows){
+  const g={};
+  rows.forEach(r=>{
+    const gn=THEME_GROUP[r.c]||'🔹 その他';
+    const o=g[gn]=g[gn]||{c:gn,n:0,seen:0,green:0,red:0,yellow:0};
+    o.n+=r.n;o.seen+=r.seen;o.green+=r.green;o.red+=r.red;o.yellow+=r.yellow;
+  });
+  return Object.values(g).map(o=>({...o,rate:o.seen?Math.round(o.green/o.seen*100):null}))
+    .sort((a,b)=>{if(a.rate===null)return 1;if(b.rate===null)return -1;return a.rate-b.rate;});
+}
+function computeThemeRows(sel){
+  const cats={};
+  const add=(arr,pr)=>{(arr||[]).forEach(q=>{
+    const o=cats[q.cat]=cats[q.cat]||{n:0,seen:0,green:0,red:0,yellow:0};o.n++;
+    if(pr.seen&&pr.seen[q.id]){o.seen++;
+      const inPool=pr.wrong&&pr.wrong[q.id];
+      if(!inPool)o.green++;
+      else if(((pr.wrongCount&&pr.wrongCount[q.id])||0)>0)o.red++;
+      else o.yellow++; // 復習プールだが間違えてはいない＝正解後に自信なし/AI相談
+    }});};
+  if(sel==='__all'){Object.keys(BANKS).forEach(b=>add(ALLBANKS[b],bankProgFor(b)));}
+  else{add(sel===currentBank()?QUESTIONS:(ALLBANKS&&ALLBANKS[sel]),bankProgFor(sel));}
+  return Object.keys(cats).map(c=>({c,...cats[c],
+    rate:cats[c].seen?Math.round(cats[c].green/cats[c].seen*100):null}))
+    .sort((a,b)=>{if(a.rate===null)return 1;if(b.rate===null)return -1;return a.rate-b.rate;});
+}
+function renderThemeGraph(){
+  const host=document.getElementById('themeWrap');if(!host)return;
+  const sel=themeTab||currentBank();
+  const grouped=themeGrouped;
+  let tabs='<div class="themetabs">'+Object.keys(BANKS).map(b=>
+    `<button class="ttab${sel===b?' on':''}" data-tab="${b}" onclick="selectThemeTab('${b}')">${(BANKS[b].label||b).split('・')[0]}</button>`).join('')
+    +`<button class="ttab${sel==='__all'?' on':''}" data-tab="__all" onclick="selectThemeTab('__all')">全体</button>`
+    +`<button class="ttab" style="margin-left:auto;font-size:13px" onclick="toggleThemeGroup()">${grouped?'📋 詳細':'📊 集約'}</button></div>`;
+  if(sel!=='__all'&&sel!==currentBank()&&!ALLREADY){
+    host.innerHTML=tabs+'<div style="color:var(--sub);font-size:14px;padding:10px 2px">読み込み中…</div>';
+    loadAllBanks(()=>renderThemeGraph());return;
+  }
+  if(sel==='__all'&&!ALLREADY){
+    host.innerHTML=tabs+'<div style="color:var(--sub);font-size:14px;padding:10px 2px">読み込み中…</div>';
+    loadAllBanks(()=>renderThemeGraph());return;
+  }
+  const rawRows=computeThemeRows(sel);
+  const rows=grouped?groupThemeRows(rawRows):rawRows;
+  const bars=rows.map(r=>{
+    const seen=r.seen||0;
+    const g=seen?Math.round(r.green/seen*100):0;
+    const y=seen?Math.round(r.yellow/seen*100):0;
+    const rd=seen?Math.max(0,100-g-y):0;
+    const val=r.rate===null?'未':r.rate+'%';
+    const seg=seen
+      ?`<div class="tseg" style="width:${g}%;background:#2ecc71"></div><div class="tseg" style="width:${y}%;background:#e0a52e"></div><div class="tseg" style="width:${rd}%;background:#e74c3c"></div>`
+      :'';
+    return `<div class="tbar" data-cat="${r.c}" data-bank="${sel}">`
+      +`<div class="tbar-l">${r.c} <span class="tbar-n">${r.seen}/${r.n}</span></div>`
+      +`<div class="tbar-track">${seg}<span class="tbar-v">${val}</span></div></div>`;
+  }).join('');
+  const barsHtml = rows.length ? bars
+    : '<div style="color:var(--sub);font-size:14px;padding:10px 2px">このセットの表示データがありません。ファイルを直接開いている場合は <b>サーバー経由</b>（python3 -m http.server）で開くと他セットも読み込めます。</div>';
+  const legend='<div class="tlegend"><span><i style="background:#2ecc71"></i>正解</span>'
+    +'<span><i style="background:#e0a52e"></i>自信なし/AI相談</span>'
+    +'<span><i style="background:#e74c3c"></i>間違えた</span></div>';
+  const hint=sel==='__all'
+    ?'全セット合算。バーをタップでそのセットへ切替を促します。'
+    :'バーをタップでその分野を解く（別セット選択中はまず切替）。';
+  host.innerHTML=tabs+legend+'<div class="tbars">'+barsHtml+'</div><div class="themehint">'+hint+'</div>';
+}
+// タブ直接クリック用（イベント委譲が効かない環境の保険）
+let themeGrouped=true;
+function toggleThemeGroup(){themeGrouped=!themeGrouped;renderThemeGraph();}
+function selectThemeTab(t){themeTab=t;renderThemeGraph();}
+function themeWrapClick(e){
+  const tb=e.target.closest('.ttab');
+  if(tb){themeTab=tb.dataset.tab;renderThemeGraph();return;}
+  const bar=e.target.closest('.tbar');
+  if(bar){
+    const c=bar.dataset.cat,bank=bar.dataset.bank;
+    // 集約モード時: グループ名からそのグループに属する全カテゴリの間違いを横断出題
+    if(themeGrouped){
+      const catsInGroup=Object.keys(THEME_GROUP).filter(k=>THEME_GROUP[k]===c);
+      if(!catsInGroup.length){showToast('対象カテゴリがありません');return;}
+      if(bank==='__all'){
+        // 全バンク横断でグループ内の間違いを集める
+        loadAllBanks(function(){
+          const list=collectCrossWrong('').filter(q=>catsInGroup.includes(q.cat));
+          if(!list.length){showToast(c+' の間違いはありません🎉');return;}
+          state.mode='xwrong';state.list=list;state.idx=0;
+          state.session={correct:0,total:0,wrongIds:[]};
+          show('scQuiz');document.getElementById('btnRow').style.display='flex';
+          document.getElementById('hTitle').textContent=c+' 復習';
+          renderQ();
+        });
+      }else{
+        // 特定バンクでグループ内の間違いを出題
+        if(bank!==currentBank()){
+          if(confirm((BANKS[bank].label||bank)+' に切り替えますか？')){setBank(bank);}
+          return;
+        }
+        const list=QUESTIONS.filter(q=>catsInGroup.includes(q.cat)&&progress.wrong[q.id])
+          .sort((a,b)=>((progress.wrongCount[b.id]||0)-(progress.wrongCount[a.id]||0)));
+        if(!list.length){showToast(c+' の間違いはありません🎉');return;}
+        state.mode='wrong';state.list=list;state.idx=0;
+        state.session={correct:0,total:0,wrongIds:[]};
+        show('scQuiz');document.getElementById('btnRow').style.display='flex';
+        document.getElementById('hTitle').textContent=c+' 復習';
+        renderQ();
+      }
+      return;
+    }
+    // 詳細モード時: 従来どおり単一カテゴリ
+    if(bank==='__all'){
+      loadAllBanks(function(){
+        const list=collectCrossWrong(c);
+        if(!list.length){showToast(c+' の間違いはありません🎉');return;}
+        state.mode='xwrong';state.list=list;state.idx=0;
+        state.session={correct:0,total:0,wrongIds:[]};
+        show('scQuiz');document.getElementById('btnRow').style.display='flex';
+        document.getElementById('hTitle').textContent=c+' 復習';
+        renderQ();
+      });
+    }else if(bank===currentBank()){
+      const list=QUESTIONS.filter(q=>q.cat===c&&progress.wrong[q.id])
+        .sort((a,b)=>((progress.wrongCount[b.id]||0)-(progress.wrongCount[a.id]||0)));
+      if(!list.length){showToast(c+' の間違いはありません🎉');return;}
+      state.mode='wrong';state.list=list;state.idx=0;
+      state.session={correct:0,total:0,wrongIds:[]};
+      show('scQuiz');document.getElementById('btnRow').style.display='flex';
+      document.getElementById('hTitle').textContent=c+' 復習';
+      renderQ();
+    }else{
+      if(confirm((BANKS[bank].label||bank)+' に切り替えますか？')){setBank(bank);}
+    }
+  }
+}
+
+/* ===== ふっかつのじゅもん（進捗の端末間引き継ぎ・案B フル） ===== */
+const JUMON_PREFIX='DEAv1:';
+function openJumon(){
+  document.getElementById('jOut').value='';
+  document.getElementById('jIn').value='';
+  document.getElementById('jmask').classList.add('on');
+}
+function closeJumon(){document.getElementById('jmask').classList.remove('on');}
+
+// 進捗オブジェクト→じゅもん文字列（UTF-8安全なBase64）
+function encodeJumon(obj){
+  const json=JSON.stringify(obj);
+  // encodeURIComponent でUTF-8化→btoaでBase64（マルチバイト対策）
+  const b64=btoa(unescape(encodeURIComponent(json)));
+  return JUMON_PREFIX+b64;
+}
+function decodeJumon(str){
+  let s=(str||'').trim();
+  if(s.startsWith(JUMON_PREFIX))s=s.slice(JUMON_PREFIX.length);
+  s=s.replace(/\s+/g,''); // 改行・空白を除去（手打ち/コピペの保険）
+  const json=decodeURIComponent(escape(atob(s)));
+  return JSON.parse(json);
+}
+
+function bankLSKey(b){return 'dea_drill_progress_v1_'+b;}
+function readBankProg(b){
+  try{const p=JSON.parse(localStorage.getItem(bankLSKey(b)))||{};
+    p.seen=p.seen||{};p.wrong=p.wrong||{};p.wrongCount=p.wrongCount||{};p.correctCount=p.correctCount||{};p.unsure=p.unsure||{};
+    return p;}catch(e){return{seen:{},wrong:{},wrongCount:{},correctCount:{},unsure:{}};}
+}
+// 横断モードで他バンクの進捗を書き戻す。現バンクなら live progress を更新して保存。
+function writeBankProg(b,pr){
+  if(b===currentBank()){progress=pr;saveProgress();}
+  else localStorage.setItem(bankLSKey(b),JSON.stringify(pr));
+}
+function mergeProg(cur,inc){
+  cur=cur||{};inc=inc||{};
+  const merged={seen:{},wrong:{},wrongCount:{},correctCount:{}};
+  const ids=new Set([].concat(
+    Object.keys(cur.seen||{}),Object.keys(inc.seen||{}),
+    Object.keys(cur.wrong||{}),Object.keys(inc.wrong||{}),
+    Object.keys(cur.wrongCount||{}),Object.keys(inc.wrongCount||{}),
+    Object.keys(cur.correctCount||{}),Object.keys(inc.correctCount||{})
+  ));
+  ids.forEach(id=>{
+    if((cur.seen&&cur.seen[id])||(inc.seen&&inc.seen[id]))merged.seen[id]=true;
+    if((cur.wrong&&cur.wrong[id])||(inc.wrong&&inc.wrong[id]))merged.wrong[id]=true;
+    const wc=Math.max((cur.wrongCount&&cur.wrongCount[id])||0,(inc.wrongCount&&inc.wrongCount[id])||0);if(wc)merged.wrongCount[id]=wc;
+    const cc=Math.max((cur.correctCount&&cur.correctCount[id])||0,(inc.correctCount&&inc.correctCount[id])||0);if(cc)merged.correctCount[id]=cc;
+  });
+  return merged;
+}
+function genJumon(){
+  // 全問題セット（A〜D）の進捗をまとめて1つのじゅもんにする
+  const banks={};
+  Object.keys(BANKS).forEach(b=>{
+    banks[b]=(b===currentBank())
+      ?{seen:progress.seen||{},wrong:progress.wrong||{},wrongCount:progress.wrongCount||{},correctCount:progress.correctCount||{}}
+      :readBankProg(b);
+  });
+  const payload={v:2,banks:banks};
+  // ⚡どっち（amida）の「間違えたものモード」記録も同梱する。
+  // 持ち運ぶ価値のある永久記録だけ。その場限りの定着カウント(amida_need_v1)は入れない＝呪文を短く保つ。
+  try{
+    const ev=JSON.parse(localStorage.getItem('amida_everwrong_v1'))||{};
+    if(ev&&Object.keys(ev).length) payload.amida={ever:ev};
+  }catch(e){}
+  document.getElementById('jOut').value=encodeJumon(payload);
+  showToast('📜 全セット＋⚡どっちのじゅもんを出しました。コピーしてもう片方の端末へ');
+}
+
+function copyJumon(){
+  const v=document.getElementById('jOut').value;
+  if(!v){showToast('先に「じゅもんを 出す」を押してください');return;}
+  const done=()=>showToast('📋 じゅもんをコピーしました');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(v).then(done).catch(()=>{
+      const ta=document.getElementById('jOut');ta.focus();ta.select();
+      try{document.execCommand('copy');done();}catch(e){showToast('長押しでコピーしてください');}
+    });
+  }else{
+    const ta=document.getElementById('jOut');ta.focus();ta.select();
+    try{document.execCommand('copy');done();}catch(e){showToast('長押しでコピーしてください');}
+  }
+}
+
+function applyJumon(){
+  const v=document.getElementById('jIn').value;
+  if(!v.trim()){showToast('じゅもんを貼り付けてください');return;}
+  let data;
+  try{data=decodeJumon(v);}catch(e){alert('じゅもんが ちがうようです。コピーミスや欠けがないか確認してください。');return;}
+  if(!data||typeof data!=='object'){alert('じゅもんの中身が読み取れませんでした。');return;}
+  // 全バンク版（v2）：各セットの進捗をそれぞれのlocalStorageへ合算
+  if(data.banks&&typeof data.banks==='object'){
+    let touched=0; const lines=[];
+    Object.keys(data.banks).forEach(b=>{
+      const inc=data.banks[b];if(!inc)return;
+      const cur=(b===currentBank())?progress:readBankProg(b);
+      const merged=mergeProg(cur,inc);
+      localStorage.setItem(bankLSKey(b),JSON.stringify(merged));
+      if(b===currentBank())progress=merged;
+      touched++;
+      const seenN=Object.keys(merged.seen||{}).length;
+      const wrongN=Object.keys(merged.wrong||{}).filter(id=>merged.wrong[id]).length;
+      lines.push('・'+((BANKS[b]&&BANKS[b].label)||b)+'：学習'+seenN+'問／間違い'+wrongN+'問');
+    });
+    // ⚡どっち（amida）の間違えたものモード記録も合算（重複はスキップ・履歴は消えない）
+    let amidaMerged=0;
+    if(data.amida&&data.amida.ever&&typeof data.amida.ever==='object'){
+      let cur={};try{cur=JSON.parse(localStorage.getItem('amida_everwrong_v1'))||{};}catch(e){cur={};}
+      Object.entries(data.amida.ever).forEach(([deck,list])=>{
+        if(!Array.isArray(list))return;
+        if(!cur[deck])cur[deck]=[];
+        list.forEach(t=>{if(!cur[deck].includes(t)){cur[deck].push(t);amidaMerged++;}});
+      });
+      try{localStorage.setItem('amida_everwrong_v1',JSON.stringify(cur));}catch(e){}
+    }
+    saveProgress();renderHome();closeJumon();
+    alert('✨ 全'+touched+'セットを復元しました（履歴は消えません）\n\n'+lines.join('\n')+(amidaMerged?'\n・⚡どっち：+'+amidaMerged+'枚':'')+'\n\n※ホームは「いま選んでいる問題セット」だけを表示します。上の A〜E を切り替えると各セットの復元内容が見られます。');
+    return;
+  }
+  // 旧・単一バンク版：今選んでいるセットに合算
+  if(data.seen){
+    progress=mergeProg(progress,data);
+    saveProgress();renderHome();closeJumon();
+    showToast('✨ じゅもんを合算しました（このセットに反映・履歴は消えません）');
+    return;
+  }
+  alert('じゅもんの中身が読み取れませんでした。');
+}
+function show(id){[...document.querySelectorAll('.screen')].forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
+
+// 起動（バンクのquestionsスクリプト読み込み完了後にloadBankのonloadから呼ばれる）
+function renderBankToggle(){
+  const el=document.getElementById('bankToggle');
+  if(!el)return;
+  const cur=currentBank();
+  el.innerHTML='<span class="bankLabel">問題セット</span>'+
+    Object.keys(BANKS).map(k=>
+      `<button class="bankBtn${k===cur?' on':''}" onclick="setBank('${k}')">${BANKS[k].label}</button>`
+    ).join('');
+}
+function boot(){
+  renderBankToggle();
+  const tw=document.getElementById('themeWrap');if(tw&&!tw._wired){tw._wired=1;tw.addEventListener('click',themeWrapClick);}
+  renderHome();
+}
+</script>
+</body>
+</html>

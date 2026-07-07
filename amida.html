@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DEA こんな時どっち？</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Yu Gothic','游ゴシック','Noto Sans JP',sans-serif;background:#fafafa;color:#121212;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.app{max-width:600px;width:100%;text-align:center}
+
+/* トップ */
+.top h1{font-size:20px;color:#183251;margin-bottom:6px}
+.top .sub{font-size:14px;color:#5e5e5e;margin-bottom:24px}
+.decks{display:flex;flex-direction:column;gap:10px;text-align:left}
+.deck{background:#fff;border:1px solid #c8c2b0;padding:16px 18px;cursor:pointer;font-family:inherit;font-size:17px;color:#183251;font-weight:700;text-align:left;width:100%}
+.deck:hover{border-color:#21537f;background:#edf2f4}
+.deck .cnt{font-size:13px;color:#5e5e5e;font-weight:400;margin-left:8px}
+.deck.todo{opacity:.4;cursor:default;font-weight:400}
+.deck.todo:hover{border-color:#c8c2b0;background:#fff}
+
+/* クイズ */
+.quiz{display:none;flex-direction:column;align-items:center}
+.progress{font-size:13px;color:#5e5e5e;margin-bottom:18px}
+.situation{font-size:22px;font-weight:700;color:#121212;margin-bottom:28px;line-height:1.5;text-align:center}
+.choices{display:flex;flex-direction:column;gap:12px;width:100%}
+.ch{background:#fff;border:2px solid #c8c2b0;padding:16px 20px;cursor:pointer;font-family:inherit;font-size:18px;color:#183251;font-weight:700;text-align:center;transition:all .15s}
+.ch:hover{border-color:#21537f;background:#edf2f4;transform:scale(1.02)}
+.ch:active{transform:scale(.98)}
+
+/* 結果 */
+.result{display:none;flex-direction:column;align-items:center}
+.res-icon{font-size:48px;margin-bottom:12px}
+.res-text{font-size:20px;font-weight:700;margin-bottom:6px}
+.res-text.ok{color:#183251}
+.res-text.ng{color:#b01212}
+.res-choices{display:flex;flex-direction:column;gap:8px;width:100%;margin-bottom:16px}
+.res-opt{font-size:17px;padding:12px 15px;border:1px solid #c8c2b0;background:#fff;text-align:left;line-height:1.55;color:#333}
+.res-opt.correct{background:#eafaf0;border:2px solid #2ecc71;color:#121212;font-weight:700}
+.res-opt.picked-wrong{background:#fdecec;border:2px solid #e74c3c;color:#121212}
+.res-opt .rmk{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
+.res-why{font-size:17px;color:#121212;margin-bottom:14px;line-height:1.7;text-align:left;background:#faf9f5;padding:16px 18px;border-left:4px solid #21537f;width:100%}
+.res-why b{color:#183251}
+.res-tip{font-size:16px;color:#121212;margin-bottom:24px;line-height:1.7;text-align:left;background:#fffdf2;padding:16px 18px;border-left:4px solid #ba8425;width:100%}
+.res-tip b{color:#7a471a}
+.nextbtn{background:#21537f;color:#fff;border:none;padding:14px 32px;font-size:16px;cursor:pointer;font-family:inherit;font-weight:700}
+.nextbtn:hover{background:#162a42}
+.res-btns{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.backbtn{background:#fafafa;color:#21537f;border:1px solid #c8c2b0;padding:14px 22px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700}
+.backbtn:hover{background:#edf2f4;border-color:#21537f}
+.backbtn:disabled{opacity:.3;cursor:default}
+.quiz-back{margin-top:22px;background:transparent;color:#5e5e5e;border:1px solid #c8c2b0;padding:9px 18px;font-size:14px;cursor:pointer;font-family:inherit;font-weight:700}
+.quiz-back:hover{background:#edf2f4;color:#21537f;border-color:#21537f}
+
+/* スコア */
+.score{display:none;flex-direction:column;align-items:center}
+.score-num{font-size:42px;font-weight:700;color:#183251;margin-bottom:8px}
+.score-sub{font-size:16px;color:#5e5e5e;margin-bottom:24px}
+.score-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.score-btns button{padding:12px 22px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700;border:none}
+.score-btns .retry{background:#21537f;color:#fff}
+.score-btns .retry:hover{background:#162a42}
+.score-btns .back{background:#fafafa;color:#21537f;border:1px solid #c8c2b0}
+.score-btns .back:hover{background:#edf2f4}
+
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav style="display:flex;gap:6px;margin:0 0 16px;padding:8px 0;flex-wrap:wrap">
+    <a href="index.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5e5e5e;background:#fff;border:1px solid #c8c2b0;padding:8px 4px;text-decoration:none;min-width:60px">🎯 ドリル</a>
+    <a href="amida.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#121212;background:#edf2f4;border:1px solid #21537f;padding:8px 4px;text-decoration:none;min-width:60px">⚡ どっち</a>
+    <a href="mock-exam.html" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#5e5e5e;background:#fff;border:1px solid #c8c2b0;padding:8px 4px;text-decoration:none;min-width:60px">📝 模試</a>
+  </nav>
+  <div class="top" id="top">
+    <h1>こんな時どっち？</h1>
+    <div class="sub">2択で答える。電車で10秒ずつ。</div>
+    <div id="import-tool" style="margin-bottom:16px;text-align:center">
+      <button id="import-btn" class="deck" style="border-color:#ba8425;background:#fffdf2;text-align:center">📥 ドリル弱点を取り込む</button>
+    </div>
+    <div class="decks" id="decks"></div>
+  </div>
+  <div class="quiz" id="quiz">
+    <div class="progress" id="progress"></div>
+    <div class="situation" id="situation"></div>
+    <div class="choices" id="choices"></div>
+    <button class="quiz-back" id="quiz-back" style="display:none">← 前の問題の解説を見る</button>
+  </div>
+  <div class="result" id="result">
+    <div class="res-icon" id="res-icon"></div>
+    <div class="res-text" id="res-text"></div>
+    <div class="res-choices" id="res-choices"></div>
+    <div class="res-why" id="res-why"></div>
+    <div class="res-tip" id="res-tip" style="display:none"></div>
+    <div class="res-btns">
+      <button class="backbtn" id="backbtn">← 前へ</button>
+      <button class="nextbtn" id="nextbtn">次へ →</button>
+    </div>
+  </div>
+  <div class="score" id="score">
+    <div class="score-num" id="score-num"></div>
+    <div class="score-sub" id="score-sub"></div>
+    <div class="score-btns">
+      <button class="retry" id="score-wrong" style="background:#b01212;display:none">❌ 間違えたやつだけ</button>
+      <button class="retry" id="score-retry">もう一度</button>
+      <button class="back" id="score-back">別のデッキ</button>
+    </div>
+  </div>
+  <!-- Import Modal -->
+  <div id="import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;padding:20px;overflow-y:auto">
+    <div style="background:#fff;max-width:500px;margin:40px auto;padding:20px;border-radius:12px">
+      <h3 style="margin-bottom:12px">📥 ドリル弱点を取り込む</h3>
+      <p style="font-size:14px;color:#5e5e5e;margin-bottom:14px">ドリルで間違えた問題をAmidaの「間違えたものモード」に取り込みます。AmidaのlocalStorageデータが変更されます。</p>
+      <details style="margin-bottom:14px">
+        <summary style="cursor:pointer;font-size:14px;color:#21537f;font-weight:700">💾 ふっかつのじゅもんから取り込む（別端末のデータ）</summary>
+        <textarea id="import-jumon" style="width:100%;height:80px;margin-top:8px;font-size:13px;border:1px solid #c8c2b0;padding:8px;border-radius:6px" placeholder="DEAv1:... のじゅもんを貼り付け"></textarea>
+      </details>
+      <div id="import-status" style="display:none;font-size:14px;padding:10px;margin-bottom:10px;border-radius:8px"></div>
+      <div style="display:flex;gap:10px">
+        <button id="import-cancel" style="flex:1;padding:12px;font-size:15px;border:1px solid #c8c2b0;background:#fff;cursor:pointer;font-family:inherit;font-weight:700;border-radius:6px">キャンセル</button>
+        <button id="import-confirm" style="flex:1;padding:12px;font-size:15px;border:none;background:#21537f;color:#fff;cursor:pointer;font-family:inherit;font-weight:700;border-radius:6px">取り込む</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const decks = {
+  'ingest': {
+    name: '🌊 取り込み・ストリーミングの選び方',
+    cards: [
+      {s:'保持期間内に複数コンシューマーが同じストリームを独立に再読み込み（リプレイ）',a:'Kinesis Data Streams',b:'Kinesis Data Firehose',ans:'a',why:'KDS=<b>保持期間内で再読み＋複数独立読み</b>。Firehoseは配信するだけで溜めて読み直せない。',tip:'リプレイ・複数独立読み＝KDS(溜めた水を各自コップで何度でも)。'},
+      {s:'変換・圧縮こみでS3やRedshiftへサーバーレスに配信（コードを書きたくない）',a:'Kinesis Data Firehose',b:'Kinesis Data Streams',ans:'a',why:'Firehose=<b>配信特化・フルマネージド</b>。バッファリング・変換・圧縮を内蔵。',tip:'配信特化・コード不要＝Firehose(蛇口から直接バケツへ)。'},
+      {s:'既存のApache Kafka資産（API互換必須）をそのままマネージドに移したい',a:'Amazon MSK',b:'Kinesis Data Streams',ans:'a',why:'MSK=<b>Kafka互換</b>で既存資産をそのまま。KinesisはAWS独自API。',tip:'Kafka互換＝MSK。独自APIで良ければKinesis。'},
+      {s:'各コンシューマーに専用スループット（他の読み手の影響を受けない）が欲しい',a:'標準コンシューマー',b:'拡張ファンアウト（Enhanced Fan-Out）',ans:'b',why:'拡張ファンアウト=<b>コンシューマーごとに2MB/秒を専有</b>・低レイテンシ。',tip:'専用スループット＝拡張ファンアウト。共有で足りるなら標準。'},
+      {s:'オンプレDBの変更を継続的にキャプチャ（CDC）してS3へレプリケート',a:'AWS DMS',b:'AWS Glue',ans:'a',why:'DMS=<b>全ロード＋CDC</b>で継続レプリケート。Glueは変換ETL用。',tip:'DBのCDC・移行＝DMS。'},
+      {s:'Salesforce等のSaaSからノーコードでデータを取り込みたい',a:'Kinesis Data Firehose',b:'Amazon AppFlow',ans:'b',why:'AppFlow=<b>SaaSコネクタ・ノーコード</b>連携。',tip:'SaaS連携ノーコード＝AppFlow。'},
+      {s:'ストリームにリアルタイムでウィンドウ集計（直近5分の合計など）を行う',a:'Managed Service for Apache Flink',b:'Kinesis Data Firehose',ans:'a',why:'Flink=<b>継続クエリ・ストリーム集計</b>。Firehoseは配信のみ。',tip:'ストリームのウィンドウ集計＝Flink。'},
+      {s:'ストリーム取り込み量が予測不能で急変する。シャード管理をしたくない',a:'KDS プロビジョンドモード',b:'KDS オンデマンドモード',ans:'b',why:'オンデマンド=<b>シャードを自動スケール</b>・容量管理不要。',tip:'容量が読めない・管理したくない＝オンデマンド。'},
+      {s:'Kafkaを使いたいがブローカー容量の管理もしたくない',a:'MSK Serverless',b:'MSK プロビジョンド',ans:'a',why:'MSK Serverless=<b>容量管理不要</b>で自動スケール。',tip:'Kafka＋容量管理ゼロ＝MSK Serverless。'},
+      {s:'多数の小さなレコードをまとめてLambdaで効率よく処理したい',a:'1レコードごとに関数を起動',b:'バッチウィンドウ/バッチサイズを設定',ans:'b',why:'<b>バッチウィンドウ</b>で複数レコードをまとめて1回の呼び出しに。',tip:'小レコード多数＝バッチ化して呼び出し削減。'},
+      {s:'RDS/Auroraのデータを継続的にRedshiftへ、ETLパイプラインを作らず同期したい',a:'ゼロETL統合',b:'DMSでCDCレプリケーション',ans:'a',why:'ゼロETL統合=<b>パイプライン不要でRedshiftへ自動同期</b>。DMSは構築・運用が要る。',tip:'ETL作らずDB→Redshift同期＝ゼロETL統合。'},
+      {s:'ストリームデータをRedshiftに直接取り込みマテリアライズドビュー化',a:'Firehose経由でS3→COPY',b:'Redshift Streaming Ingestion',ans:'b',why:'Streaming Ingestion=<b>ストリームを直接Redshiftへ取り込み</b>。S3経由のバッチより低レイテンシ。',tip:'ストリーム→Redshift直接＝Streaming Ingestion。'},
+      {s:'オンプレの大量ファイルを定期的にS3へ効率よく転送',a:'AWS DataSync',b:'AWS Transfer Family',ans:'a',why:'DataSync=<b>大量データの高速転送に特化</b>。Transfer FamilyはSFTP/FTPS窓口。',tip:'大量転送＝DataSync。SFTP受け口＝Transfer Family。'},
+      {s:'100TB級を回線が細い拠点から物理デバイスでオフライン移行',a:'DataSync',b:'AWS Snowball',ans:'b',why:'Snowball=<b>物理デバイスでオフライン大容量移行</b>。回線が細い時に有効。',tip:'巨大＋細回線＝Snowball(物理搬送)。'},
+      {s:'Kafkaのスキーマ進化と互換性を一元管理したい',a:'Glue Schema Registry',b:'アプリ側で手動管理',ans:'a',why:'Glue Schema Registry=<b>スキーマ進化・互換性チェックを管理</b>。',tip:'スキーマ進化管理＝Glue Schema Registry。'},
+    
+    ]
+  },
+  'transform': {
+    name: '🔧 変換・ETLの選び方',
+    cards: [
+      {s:'サーバーレスのSpark ETL＋スキーマを自動でカタログ化したい',a:'AWS Glue',b:'Amazon EMR',ans:'a',why:'Glue=<b>サーバーレスETL＋Data Catalog</b>。クラスタ管理なし。',tip:'サーバーレスETL＋カタログ＝Glue。'},
+      {s:'Hadoop/Sparkクラスタを細かく制御・チューニング・常時稼働で使いたい',a:'Amazon EMR',b:'AWS Glue',ans:'a',why:'EMR=<b>クラスタを自分で制御</b>。細かいチューニング向き。',tip:'クラスタを触る＝EMR。サーバーレスで済むならGlue。'},
+      {s:'コードを書かずに視覚的にデータクレンジング・準備をしたい',a:'Glue DataBrew',b:'Glue ETLジョブ',ans:'a',why:'DataBrew=<b>ノーコード・ビジュアル準備（レシピ）</b>。',tip:'ノーコード整形＝DataBrew。'},
+      {s:'前回実行以降に届いた新規ファイルだけを差分処理したい',a:'処理済み一覧を自前でDynamoDBに記録',b:'ジョブブックマークを有効化',ans:'b',why:'Glueの<b>ジョブブックマーク</b>が処理済みを自動追跡。自前管理は車輪の再発明。',tip:'Glueの増分処理＝ジョブブックマーク。'},
+      {s:'Sparkクラスタの起動・停止管理なしでSparkジョブを実行したい',a:'EMR Serverless',b:'EMR on EC2',ans:'a',why:'EMR Serverless=<b>クラスタ管理不要</b>で自動プロビジョン。',tip:'Spark＋クラスタ管理ゼロ＝EMR Serverless。'},
+      {s:'SLAが緩いバッチを、多少遅くてもいいので安く回したい',a:'標準実行',b:'Glue Flex実行',ans:'b',why:'Flex=<b>余剰キャパで割安</b>（開始遅延を許容）。',tip:'急がないバッチを安く＝Glue Flex。'},
+      {s:'S3上に大量の小さなファイルができてクエリが遅い。どう対処？',a:'コンパクション（ファイル結合）',b:'そのまま放置',ans:'a',why:'小ファイルは<b>結合して最適サイズ化</b>するとスキャン効率が上がる。',tip:'小ファイル問題＝コンパクションで結合。'},
+      {s:'ETLの複数ステップ（ジョブ→クローラ→ジョブ）の依存を組みたい（Glue中心）',a:'手動で順番に実行',b:'Glue Workflows',ans:'b',why:'Glue Workflows=<b>Glueジョブ/クローラの依存を連結</b>。',tip:'Glue中心の連結＝Glue Workflows。'},
+      {s:'列指向で圧縮が効き、分析クエリのスキャン量を減らす保存形式は？',a:'Parquet / ORC',b:'CSV / JSON',ans:'a',why:'Parquet/ORC=<b>列指向・圧縮・述語プッシュダウン</b>でスキャン削減。',tip:'分析用の保存＝列指向(Parquet/ORC)。'},
+      {s:'S3へのクエリ結果を新テーブル＋Parquetで一発書き出し',a:'Athena CTAS',b:'手動でGlueジョブを書く',ans:'a',why:'CTAS=<b>CREATE TABLE AS SELECTでクエリ結果を新テーブル化</b>・フォーマット指定可。',tip:'クエリ結果を新テーブル＝Athena CTAS。'},
+      {s:'RDS等の複数ソースを事前コピーせず横断SQLしたい',a:'都度エクスポートして結合',b:'Athena Federated Query',ans:'b',why:'Federated Query=<b>コネクタで多様なソースを直接横断クエリ</b>。事前コピー不要。',tip:'事前コピーなし横断＝Athena Federated Query。'},
+      {s:'大テーブルと小テーブルの結合で、シャッフルを避け高速化',a:'ブロードキャストジョイン',b:'通常のシャッフルジョイン',ans:'a',why:'ブロードキャスト=<b>小テーブルを全ノードに配布</b>しシャッフル回避。',tip:'小テーブル配布で高速結合＝ブロードキャストジョイン。'},
+    
+    ]
+  },
+  'store': {
+    name: '🗃 データストア・モデリングの選び方',
+    cards: [
+      {s:'S3上のデータにサーバーレスでアドホックにSQL（クラスタ不要）',a:'Amazon Redshift',b:'Amazon Athena',ans:'b',why:'Athena=<b>サーバーレス・スキャン従量課金</b>。クラスタ不要。',tip:'S3にサーバーレスSQL＝Athena。'},
+      {s:'ペタバイト級を高頻度に複雑集計・結合する本格DWH',a:'Amazon Athena',b:'Amazon Redshift',ans:'b',why:'Redshift=<b>列指向・分散並列の本格DWH</b>。高頻度大規模向き。',tip:'常設の大規模DWH＝Redshift。アドホックはAthena。'},
+      {s:'Redshiftから、S3のデータをロードせず直接結合クエリしたい',a:'一度COPYでロード',b:'Redshift Spectrum',ans:'b',why:'Spectrum=<b>外部テーブルでS3を直接クエリ</b>（ロード不要）。',tip:'ロードせずS3直接＝Redshift Spectrum。'},
+      {s:'S3のテーブルにACIDな更新・削除・タイムトラベルが欲しい',a:'Apache Iceberg',b:'素のParquet',ans:'a',why:'Iceberg=<b>ACID・スナップショット・スキーマ進化</b>対応のテーブル形式。',tip:'S3でACID/タイムトラベル＝Iceberg(やHudi)。'},
+      {s:'Redshiftで結合されるテーブルを同じノードに寄せて再分散を減らす',a:'SORTKEY（ソートキー）',b:'DISTKEY（分散キー）',ans:'b',why:'DISTKEY=<b>結合キーでデータ配置を揃え</b>再分散を削減。',tip:'再分散を減らす＝DISTKEY。範囲絞りはSORTKEY。'},
+      {s:'Redshiftで日付範囲の絞り込みを高速化してスキャンを減らす',a:'DISTKEY（分散キー）',b:'SORTKEY（ソートキー）',ans:'b',why:'SORTKEY=<b>ソート順で範囲スキャンをスキップ</b>。',tip:'範囲フィルタ高速化＝SORTKEY。'},
+      {s:'アクセス頻度が読めないS3データのコストを自動最適化',a:'S3 Standard-IAに固定',b:'S3 Intelligent-Tiering',ans:'b',why:'Intelligent-Tiering=<b>アクセス頻度で自動階層化</b>。読めない時に最適。',tip:'頻度が読めない＝Intelligent-Tiering。'},
+      {s:'DynamoDBで特定キーにアクセスが集中（ホットパーティション）。どう設計？',a:'書き込みシャーディング（キーに接尾辞）',b:'オンデマンドにすれば解決',ans:'a',why:'ホットキーは<b>キー分散（シャーディング）</b>で解消。容量モード変更では直らない。',tip:'ホットパーティション＝キー設計で分散。オンデマンドは万能薬ではない。'},
+      {s:'DynamoDBの全データを分析用にS3へ、テーブル負荷をかけずに出したい',a:'全項目をScan',b:'S3へのエクスポート（PITR活用）',ans:'b',why:'<b>S3エクスポート</b>はテーブルのRCUを消費せず全件出力。Scanは高負荷。',tip:'DynamoDB→分析＝S3エクスポート(Scanしない)。'},
+      {s:'複数チームでRedshiftのデータをコピーせず共有したい',a:'Redshiftデータ共有（Data Sharing）',b:'UNLOADして配布',ans:'a',why:'Data Sharing=<b>コピーせずライブに共有</b>。',tip:'コピーなし共有＝Redshift Data Sharing。'},
+      {s:'DynamoDBの読み取りをマイクロ秒級に高速化',a:'ElastiCacheを自前構築',b:'DynamoDB Accelerator（DAX）',ans:'b',why:'DAX=<b>DynamoDB専用インメモリキャッシュ</b>・マイクロ秒応答。',tip:'DynamoDB読み取り高速化＝DAX。'},
+      {s:'DynamoDBを複数リージョンで双方向にレプリケート',a:'グローバルテーブル',b:'自前でクロスリージョン複製',ans:'a',why:'グローバルテーブル=<b>マルチリージョン双方向レプリケーション</b>をマネージド提供。',tip:'DynamoDBマルチリージョン＝グローバルテーブル。'},
+      {s:'IoTの時系列データを自動階層化して保存・時間集計',a:'DynamoDB',b:'Amazon Timestream',ans:'b',why:'Timestream=<b>時系列専用DB</b>・メモリ/マグネティック層の自動階層化。',tip:'時系列専用＝Timestream。'},
+      {s:'高カーディナリティ列で過剰パーティションを避けつつ等値検索を速く',a:'Bucketing（ハッシュ振り分け）',b:'その列でパーティション',ans:'a',why:'Bucketing=<b>ハッシュで固定数バケットに振り分け</b>・パーティション肥大を回避。',tip:'高カーディナリティ＝Bucketing(パーティションでなく)。'},
+      {s:'巨大なCSV/JSONの一部の列・行だけ取得してスキャン削減',a:'S3 Select',b:'オブジェクト全体をダウンロード',ans:'a',why:'S3 Select=<b>オブジェクト内を部分抽出</b>し転送量を削減。',tip:'一部だけ取り出す＝S3 Select。'},
+    
+    ]
+  },
+  'ops': {
+    name: '⚙️ 運用・オーケストレーションの選び方',
+    cards: [
+      {s:'既存のAirflow DAG資産と運用ノウハウを活かしてマネージド化したい',a:'AWS Step Functions',b:'Amazon MWAA',ans:'b',why:'MWAA=<b>マネージドAirflow</b>。既存DAGをそのまま流用できる。',tip:'既存Airflow資産＝MWAA。'},
+      {s:'サーバーレスに状態遷移・分岐・リトライを定義（Airflow資産なし）',a:'AWS Step Functions',b:'Amazon MWAA',ans:'a',why:'Step Functions=<b>サーバーレスなワークフロー</b>。ゼロから組むなら軽量。',tip:'サーバーレスで新規＝Step Functions。'},
+      {s:'数万件を並列で反復処理（大規模fan-out）したい',a:'Lambdaで直列ループ',b:'Step Functions 分散マップ',ans:'b',why:'分散マップ=<b>大規模並列反復</b>を管理。直列ループは遅く上限も厳しい。',tip:'大規模並列反復＝分散マップ(Distributed Map)。'},
+      {s:'データの欠損・異常・重複をルールで自動検査したい',a:'Glue Data Quality',b:'自前SQLでチェック',ans:'a',why:'Glue Data Quality=<b>DQDLルールセット</b>で品質を自動評価。',tip:'データ品質チェック＝Glue Data Quality。'},
+      {s:'イベントソースを軽量に変換してターゲットへ中継（フィルタ・エンリッチ）',a:'自前Lambda中継を実装',b:'EventBridge Pipes',ans:'b',why:'Pipes=<b>source→filter→enrich→targetを設定で実現</b>。',tip:'イベント中継の配管＝EventBridge Pipes。'},
+      {s:'cron的に定時起動したい（多数のスケジュールを一元管理）',a:'EventBridge Scheduler',b:'各サービスで個別にcron',ans:'a',why:'Scheduler=<b>大量スケジュールを一元管理</b>・柔軟なcron/rate。',tip:'定時起動の一元管理＝EventBridge Scheduler。'},
+      {s:'再実行しても二重集計にならないパイプラインにしたい',a:'とにかくリトライ',b:'冪等性（デデュープ/上書き設計）',ans:'b',why:'<b>冪等な設計</b>で重複実行を無害化。リトライ前提ほど重要。',tip:'再実行安全＝冪等性(idempotency)。'},
+      {s:'特定のログパターン発生数をメトリクス化してアラームしたい',a:'CloudWatch メトリクスフィルタ',b:'ログを目視で確認',ans:'a',why:'メトリクスフィルタ=<b>ログのパターンを数値メトリクス化</b>しアラーム可能。',tip:'ログ→メトリクス＝メトリクスフィルタ。'},
+      {s:'大量ログを対話的にクエリして障害を調査',a:'目視でログを確認',b:'CloudWatch Logs Insights',ans:'b',why:'Logs Insights=<b>ログを対話的にクエリ・集計</b>して原因調査。',tip:'ログ対話クエリ＝Logs Insights。'},
+      {s:'高頻度・短時間で大量に走るワークフロー',a:'Step Functions Express',b:'Step Functions Standard',ans:'a',why:'Express=<b>高頻度・短時間・低コスト</b>。Standardは長時間・監査向き。',tip:'高頻度短時間＝Express。長時間監査＝Standard。'},
+      {s:'データパイプラインを再現可能にコードで管理・デプロイ',a:'手動でコンソール構築',b:'CloudFormation / CDK',ans:'b',why:'IaC=<b>構成をコード化し再現可能にデプロイ</b>。',tip:'再現可能な構築＝IaC(CloudFormation/CDK)。'},
+      {s:'分散処理のどこが遅いか、サービス間をまたいで追跡',a:'AWS X-Ray',b:'勘とログ目視',ans:'a',why:'X-Ray=<b>分散トレース・サービスマップ</b>でボトルネック可視化。',tip:'分散トレース＝X-Ray。'},
+    
+    ]
+  },
+  'security': {
+    name: '🛡 セキュリティ・ガバナンスの選び方',
+    cards: [
+      {s:'データレイクを行・列・セル単位できめ細かくアクセス制御したい',a:'S3バケットポリシー/IAM',b:'AWS Lake Formation',ans:'b',why:'Lake Formation=<b>行/列/セル＋LF-Tags</b>の一元ガバナンス。',tip:'ファイングレイン＝Lake Formation。'},
+      {s:'増減する多数のアナリストに、属性・タグでまとめて権限付与したい',a:'LF-Tags（タグベースアクセス制御）',b:'個別にIAMを追記',ans:'a',why:'LF-Tags=<b>タグで権限をスケーラブルに付与</b>。',tip:'タグで一括権限＝LF-Tags。'},
+      {s:'暗号化キーの使用をCloudTrailで監査し、特定ロールに限定したい',a:'SSE-S3',b:'SSE-KMS',ans:'b',why:'SSE-KMS=<b>キーの監査・アクセス制御</b>が可能。SSE-S3はキー制御・監査ができない。',tip:'キーの監査・制御が要る＝SSE-KMS。'},
+      {s:'キー管理を任せて追加料金なしでS3を暗号化（監査要件なし）',a:'SSE-KMS',b:'SSE-S3',ans:'b',why:'SSE-S3=<b>AWS管理・追加料金なし</b>。監査/制御は不要な場合に十分。',tip:'手軽・無料の暗号化＝SSE-S3。'},
+      {s:'クエリ結果の特定列（患者ID等）を役割に応じて動的にマスキング',a:'手動でビューを都度作成',b:'Redshift 動的データマスキング',ans:'b',why:'動的データマスキング=<b>ポリシーで列値を動的に隠す</b>。',tip:'列を動的マスク＝Redshift Dynamic Data Masking。'},
+      {s:'S3内のPII（個人情報）などの機密データを自動検出したい',a:'Amazon Macie',b:'Amazon GuardDuty',ans:'a',why:'Macie=<b>S3の機密データ検出</b>。GuardDutyは脅威検知。',tip:'S3の機密データ検出＝Macie。脅威検知はGuardDuty。'},
+      {s:'DBの認証情報を安全に保管し、自動ローテーションしたい',a:'環境変数に直書き',b:'AWS Secrets Manager',ans:'b',why:'Secrets Manager=<b>保管＋自動ローテーション</b>。',tip:'認証情報の保管・自動更新＝Secrets Manager。'},
+      {s:'GlueやS3への通信をインターネットに出さずVPC内で完結させたい',a:'VPCエンドポイント',b:'NATゲートウェイ経由',ans:'a',why:'VPCエンドポイント=<b>プライベート接続</b>でネット非経由。',tip:'AWSサービスへ非公開接続＝VPCエンドポイント。'},
+      {s:'名寄せ可・生値を出さない・後で戻せる形で機密IDを保護',a:'一方向ハッシュ化',b:'トークナイゼーション',ans:'b',why:'トークナイゼーション=<b>可逆・参照整合性を保つ</b>置換。ハッシュは不可逆で戻せない。',tip:'可逆＋名寄せ＝トークナイゼーション。戻せないのはハッシュ。'},
+      {s:'リソース構成がルールに準拠しているか継続評価・自動修復',a:'AWS Config',b:'手動で定期監査',ans:'a',why:'Config=<b>構成コンプライアンスを継続評価</b>＋自動修復連携。',tip:'構成コンプラ継続評価＝AWS Config。'},
+      {s:'DR用に複数リージョンで同一の暗号化キーを使いたい',a:'リージョンごとに別々のキー',b:'KMSマルチリージョンキー',ans:'b',why:'マルチリージョンキー=<b>同一キーマテリアルを複数リージョンで</b>利用可。',tip:'複数リージョンで同一キー＝KMSマルチリージョンキー。'},
+      {s:'S3データを一定期間、改ざん・削除不可（WORM）で保持',a:'S3 Object Lock',b:'バケットポリシーで制限',ans:'a',why:'Object Lock=<b>WORM保持</b>で規制対応。ポリシーは外せてしまう。',tip:'改ざん削除不可＝S3 Object Lock(WORM)。'},
+    
+    ]
+  }
+};
+
+
+// ===== ロジック =====
+// 定着ルール: 間違えた問題は3回連続で正解するまでキューに残す。
+// 進捗はlocalStorageに保存し、次回開いたときも「まだ覚えてない問題」を覚えておく。
+const MASTER_NEED = 3;          // 間違えた問題が定着するのに必要な連続正解数
+const STORE_KEY = 'amida_need_v1';
+const EVER_KEY = 'amida_everwrong_v1';  // 一度でも間違えたカードを永久記録（定着しても消さない）
+const SEEN_KEY = 'amida_seen_v1';       // 一度でも解いたカードを記録（未着手判定用・デッキID→[質問文]）
+
+// ----- 一度でも間違えたカードの永久記録（デッキID→[質問文,...]） -----
+function loadEver(){
+  try { return JSON.parse(localStorage.getItem(EVER_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveEver(o){
+  try { localStorage.setItem(EVER_KEY, JSON.stringify(o)); } catch(e){}
+}
+// 間違えたカードを永久記録に追加（deckIdは現在のデッキ、sは質問文）
+function recordEverWrong(deckId, sText){
+  const ev = loadEver();
+  if(!ev[deckId]) ev[deckId] = [];
+  if(!ev[deckId].includes(sText)) ev[deckId].push(sText);
+  saveEver(ev);
+}
+// 全デッキ横断で「一度でも間違えたカード」を集めて配列で返す（重複除去）
+function collectEverWrongCards(){
+  const ev = loadEver();
+  const out = [];
+  const seen = new Set();
+  Object.entries(ev).forEach(([deckId, list]) => {
+    const dk = decks[deckId];
+    if(!dk) return; // デッキ再編等でIDが変わった場合はスキップ
+    list.forEach(sText => {
+      const card = dk.cards.find(c => c.s === sText);
+      if(card && !seen.has(sText)){ seen.add(sText); out.push(card); }
+    });
+  });
+  return out;
+}
+function everWrongTotal(){
+  const ev = loadEver();
+  let n = 0;
+  Object.values(ev).forEach(list => n += list.length);
+  return n;
+}
+
+// ----- 解いたカードの記録（未着手＝まだやってない問題の判定用） -----
+function loadSeen(){
+  try { return JSON.parse(localStorage.getItem(SEEN_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveSeen(o){
+  try { localStorage.setItem(SEEN_KEY, JSON.stringify(o)); } catch(e){}
+}
+function recordSeen(deckId, sText){
+  const sv = loadSeen();
+  if(!sv[deckId]) sv[deckId] = [];
+  if(!sv[deckId].includes(sText)) sv[deckId].push(sText);
+  saveSeen(sv);
+}
+// 全デッキ横断で「まだ一度も解いていないカード」を集める（元デッキIDを付与）
+function collectUnseenCards(){
+  const sv = loadSeen();
+  const ev = loadEver();   // 間違えた記録があるカードも「着手済み」とみなす（過去分の補完）
+  const out = [];
+  Object.entries(decks).forEach(([deckId, dk]) => {
+    const done = new Set([].concat(sv[deckId] || [], ev[deckId] || []));
+    dk.cards.forEach(c => {
+      if(!done.has(c.s)){ const cc = Object.assign({}, c); cc._deck = deckId; out.push(cc); }
+    });
+  });
+  return out;
+}
+function unseenTotal(){ return collectUnseenCards().length; }
+
+let current = null;
+let currentId = null;
+let queue = [];                 // まだ定着していないカードidxの待ち行列
+let needMap = {};               // カードidx → 定着までに必要な残り正解数（<=0で定着）
+let missed = new Set();         // 一度でも間違えたカードidx（保存対象）
+let history = [];               // 回答済み結果の履歴（解説の読み返し用・採点はしない）
+let reviewIdx = null;           // 履歴レビュー中の位置（null=ライブの問題中）
+
+const $ = id => document.getElementById(id);
+function showOnly(id){
+  ['top','quiz','result','score'].forEach(s => {
+    $(s).style.display = s === id ? 'flex' : 'none';
+  });
+  if(id==='top') $('top').style.display='block';
+}
+
+// ----- localStorage（まだ覚えてない問題を記憶） -----
+function loadStore(){
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveStore(store){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e){}
+}
+// 現在のデッキの「未定着の間違え問題」を質問文(s)をキーに保存
+function persistNeed(){
+  const store = loadStore();
+  const obj = {};
+  current.cards.forEach((c,i) => {
+    if(missed.has(i) && needMap[i] > 0) obj[c.s] = needMap[i];
+  });
+  if(Object.keys(obj).length) store[currentId] = obj;
+  else delete store[currentId];
+  saveStore(store);
+}
+function pendingCount(id){
+  const o = loadStore()[id];
+  return o ? Object.keys(o).length : 0;
+}
+
+function renderDecks(){
+  const wrap = $('decks');
+  wrap.innerHTML = '';
+  // 「間違えたものモード」ボタン（全デッキ横断・永久記録）
+  const ewTotal = everWrongTotal();
+  const ew = document.createElement('button');
+  ew.className = 'deck';
+  ew.style.borderColor = '#b01212';
+  ew.innerHTML = `❗️間違えたものモード<span class="cnt">${ewTotal}問</span>` +
+    (ewTotal>0 ? `<span class="cnt" style="color:#b01212">これまで間違えた全カード</span>` : `<span class="cnt">まだなし</span>`);
+  ew.onclick = () => { if(ewTotal>0) startDeck('__everwrong__'); };
+  wrap.appendChild(ew);
+  if(ewTotal>0){
+    const rst = document.createElement('button');
+    rst.className = 'deck'; rst.style.opacity='0.6'; rst.style.fontSize='14px';
+    rst.textContent = '🗑 間違え記録をリセット';
+    rst.onclick = () => { if(confirm('これまでの「間違えた記録」をすべて消しますか？')){ saveEver({}); renderDecks(); } };
+    wrap.appendChild(rst);
+  }
+  // 🆕 まだやってない問題モード（全デッキ横断・未着手のみ）
+  const unTotal = unseenTotal();
+  const un = document.createElement('button');
+  un.className = 'deck';
+  un.style.borderColor = '#21537f';
+  un.innerHTML = `🆕 まだやってない問題（全セット横断）<span class="cnt">${unTotal}問</span>` +
+    (unTotal>0 ? `<span class="cnt" style="color:#21537f">未着手をまとめて出題</span>` : `<span class="cnt">全部やりました🎉</span>`);
+  un.onclick = () => { if(unTotal>0) startDeck('__unseen__'); };
+  wrap.appendChild(un);
+
+  Object.entries(decks).forEach(([id,d]) => {
+    const b = document.createElement('button');
+    b.className = 'deck';
+    const pend = pendingCount(id);
+    const badge = pend > 0 ? `<span class="cnt" style="color:#b01212">🔁まだ${pend}問</span>` : '';
+    b.innerHTML = `${d.name}<span class="cnt">${d.cards.length}問</span>${badge}`;
+    b.onclick = () => startDeck(id);
+    wrap.appendChild(b);
+  });
+}
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+// fresh=true なら保存済みの間違え記録を消してまっさらに始める
+function startEverWrongMode(){
+  const cards = collectEverWrongCards();
+  if(cards.length === 0){ alert('まだ間違えたカードがありません。'); return; }
+  // カードに元デッキIDを付与（間違えたら元デッキの記録へ反映するため）
+  const ev = loadEver();
+  const deckOf = {};
+  Object.entries(ev).forEach(([deckId, list]) => list.forEach(sT => { if(deckOf[sT]===undefined) deckOf[sT]=deckId; }));
+  cards.forEach(c => { c._deck = deckOf[c.s] || currentId; });
+  current = { name:'❗️間違えたものモード', cards, _ever:true };
+  currentId = '__everwrong__';
+  needMap = {}; missed = new Set(); history = []; reviewIdx = null;
+  cards.forEach((c,i)=> needMap[i]=1);   // 復習は1回正解で一旦クリア（記録自体は永久に残る）
+  queue = shuffle(cards.map((_,i)=>i));
+  showQ();
+}
+
+function startUnseenMode(){
+  const cards = collectUnseenCards();   // 既に _deck 付き
+  if(cards.length === 0){ alert('未着手の問題はありません（全部やりました🎉）。'); return; }
+  current = { name:'🆕 まだやってない問題', cards, _unseen:true };
+  currentId = '__unseen__';
+  needMap = {}; missed = new Set(); history = []; reviewIdx = null;
+  cards.forEach((c,i)=> needMap[i]=1);   // 初見は1回正解で一旦クリア
+  queue = shuffle(cards.map((_,i)=>i));
+  showQ();
+}
+
+function startDeck(id, fresh){
+  if(id === '__everwrong__'){ startEverWrongMode(); return; }
+  if(id === '__unseen__'){ startUnseenMode(); return; }
+  current = decks[id];
+  currentId = id;
+  current._ever = false;
+  if(fresh){
+    const store = loadStore();
+    delete store[id];
+    saveStore(store);
+  }
+  const saved = loadStore()[id] || {};
+  needMap = {};
+  missed = new Set();
+  history = []; reviewIdx = null;
+  current.cards.forEach((c,i) => {
+    if(saved[c.s] > 0){ needMap[i] = saved[c.s]; missed.add(i); } // 前回の間違えを引き継ぐ
+    else { needMap[i] = 1; }                                      // 初見は1回正解で定着
+  });
+  queue = shuffle(current.cards.map((_,i)=>i));
+  showQ();
+}
+
+function masteredCount(){
+  return current.cards.reduce((n,_,i) => n + (needMap[i] <= 0 ? 1 : 0), 0);
+}
+
+function showQ(){
+  reviewIdx = null;                 // ライブ（今の問題）に戻る
+  if(queue.length === 0){ showScore(); return; }
+  const c = current.cards[queue[0]];
+  $('quiz-back').style.display = history.length > 0 ? 'inline-block' : 'none';
+  $('progress').textContent = `覚えた ${masteredCount()} / ${current.cards.length}　・　残り ${queue.length}`;
+  $('situation').textContent = c.s;
+  const wrap = $('choices');
+  wrap.innerHTML = '';
+  // 選択肢を動的に集める（2択でも3択でも対応）＋並びをシャッフル
+  const opts = shuffle(['a','b','c'].filter(key => c[key] != null));
+  opts.forEach(key => {
+    const b = document.createElement('button');
+    b.className = 'ch';
+    b.textContent = c[key];
+    b.onclick = () => answer(key);
+    wrap.appendChild(b);
+  });
+  showOnly('quiz');
+}
+
+function answer(picked){
+  const i = queue.shift();
+  const c = current.cards[i];
+  const ok = picked === c.ans;
+  // 記録先のデッキID（間違えたもの/まだやってないモードは元デッキ、通常は現在デッキ）
+  const deckId = (current._ever || current._unseen) ? c._deck : currentId;
+  recordSeen(deckId, c.s);                    // 解いた問題として記録（未着手判定用）
+  if(ok){
+    needMap[i]--;
+  } else {
+    needMap[i] = MASTER_NEED;   // 間違えたら3回連続正解が必要に
+    missed.add(i);
+    recordEverWrong(deckId, c.s);             // 間違えた問題として永久記録
+  }
+  // まだ定着していなければ待ち行列の後ろに戻す
+  if(needMap[i] > 0) queue.splice(Math.min(3, queue.length), 0, i);
+  persistNeed();
+
+  let head = ok ? '正解' : '不正解';
+  if(ok && needMap[i] <= 0) head = '正解 ✅ 定着！';
+  else if(ok) head = `正解 ⭕ あと${needMap[i]}回で定着`;
+  else head = `不正解 ❌ ${MASTER_NEED}回連続で正解すると定着`;
+
+  // 結果を履歴に積む（あとで「前へ」で解説を読み返せる）
+  history.push({ icon: ok ? '⭕' : '❌', head, cls: ok ? 'ok' : 'ng', card: c, picked });
+  renderResult(history.length - 1);
+}
+
+// 履歴上の結果を表示する（k=historyのインデックス）。読み返し専用で採点はしない。
+function renderResult(k){
+  reviewIdx = k;
+  const h = history[k];
+  const c = h.card, picked = h.picked;
+  $('res-icon').textContent = h.icon;
+  $('res-text').textContent = h.head;
+  $('res-text').className = 'res-text ' + h.cls;
+  // 選択肢を1つずつ改行して表示。正解は緑、選んだ誤答は赤。
+  const keys = ['a','b','c'].filter(kk => c[kk] != null);
+  $('res-choices').innerHTML = keys.map(kk => {
+    const isCorrect = kk === c.ans;
+    const isPicked = kk === picked;
+    let cls = 'res-opt', mark = '';
+    if(isCorrect){ cls += ' correct'; mark = '<span class="rmk" style="color:#1e8b4d">✓ 正解</span>'; }
+    else if(isPicked){ cls += ' picked-wrong'; mark = '<span class="rmk" style="color:#b01212">✕ あなたの回答</span>'; }
+    return '<div class="'+cls+'">'+mark+c[kk]+'</div>';
+  }).join('');
+  $('res-why').innerHTML = '<b>解説：</b>' + c.why;
+  if(c.tip){ $('res-tip').innerHTML = '📌 <b>覚え方：</b>' + c.tip; $('res-tip').style.display = 'block'; }
+  else { $('res-tip').style.display = 'none'; }
+  $('backbtn').disabled = (k <= 0);                                   // これ以上前がなければ無効
+  $('nextbtn').textContent = (k >= history.length - 1) ? '次へ →' : '次の解説 →';
+  showOnly('result');
+}
+
+// 「次へ」= 履歴を見ている途中なら新しい方向へ、最新まで来たら次の問題へ
+$('nextbtn').onclick = () => {
+  if(reviewIdx !== null && reviewIdx < history.length - 1) renderResult(reviewIdx + 1);
+  else { reviewIdx = null; showQ(); }
+};
+// 「前へ」= ひとつ古い解説へ戻る
+$('backbtn').onclick = () => {
+  if(reviewIdx !== null && reviewIdx > 0) renderResult(reviewIdx - 1);
+};
+// 問題画面から「前の問題の解説を見る」= 最新の結果を開く
+$('quiz-back').onclick = () => {
+  if(history.length > 0) renderResult(history.length - 1);
+};
+
+function showScore(){
+  const total = current.cards.length;
+  $('score-num').textContent = `${total} / ${total}`;
+  $('score-sub').textContent = '🎉 全部定着した！';
+  $('score-wrong').style.display = 'none';
+  showOnly('score');
+}
+
+$('score-retry').onclick = () => startDeck(currentId, true);   // まっさらにもう一度
+$('score-back').onclick = () => { renderDecks(); showOnly('top'); };
+
+renderDecks();
+showOnly('top');
+
+// ─── Drill-Amida Weakness Integration: Core Utilities ───
+
+/**
+ * CATEGORY_DECK_MAP: ドリルのcat値 → AmidaデッキID のマッピング（DEA 5カテゴリ）
+ */
+const CATEGORY_DECK_MAP = {
+  '取り込み・ストリーミング': 'ingest',
+  '変換・ETL':               'transform',
+  'データストア・モデリング': 'store',
+  '運用・オーケストレーション': 'ops',
+  'セキュリティ・ガバナンス': 'security'
+};
+const FALLBACK_DECK = 'store';
+
+/**
+ * resolveDeck: catからデッキIDを決定する
+ * @param {string|null|undefined} cat - ドリル問題のカテゴリ
+ * @returns {string} 対応するAmidaデッキID、未マッピング時は'store'
+ */
+function resolveDeck(cat) {
+  if (!cat) return FALLBACK_DECK;
+  return CATEGORY_DECK_MAP[cat] || FALLBACK_DECK;
+}
+
+/**
+ * extractWrongIds: ドリル進捗から間違いIDを収集する
+ * @param {string|object} source - 'local'ならlocalStorageから、
+ *                                  オブジェクトならJumonPayload（{ banks: { bankId: { wrong: {...} } } }）から収集
+ * @returns {Record<string, string[]>} { bankId: [questionId, ...], ... }
+ */
+function extractWrongIds(source) {
+  const BANKS = ['main', 'v2', 'v3'];
+  const result = {};
+
+  if (source === 'local') {
+    BANKS.forEach(function(bankId) {
+      var key = 'dea_drill_progress_v1_' + bankId;
+      try {
+        var raw = localStorage.getItem(key);
+        if (!raw) return;
+        var data = JSON.parse(raw);
+        if (data && data.wrong && typeof data.wrong === 'object') {
+          var ids = Object.keys(data.wrong).filter(function(k) {
+            return data.wrong[k] === true;
+          });
+          if (ids.length > 0) result[bankId] = ids;
+        }
+      } catch (e) { /* skip invalid JSON or missing bank */ }
+    });
+  } else if (source && typeof source === 'object' && source.banks) {
+    Object.keys(source.banks).forEach(function(bankId) {
+      var bankData = source.banks[bankId];
+      if (bankData && bankData.wrong && typeof bankData.wrong === 'object') {
+        var ids = Object.keys(bankData.wrong).filter(function(k) {
+          return bankData.wrong[k] === true;
+        });
+        if (ids.length > 0) result[bankId] = ids;
+      }
+    });
+  }
+  return result;
+}
+
+/**
+ * conceptMatch: ドリル問題のcardsとAmidaデッキのカードを照合する
+ * @param {object} question - ドリルの問題オブジェクト（cardsフィールドを持つ）
+ * @param {string} deckId - マッピング先のAmidaデッキID
+ * @returns {Array} マッチしたAmidaカードの配列（空なら未マッチ）
+ */
+function conceptMatch(question, deckId) {
+  const deck = decks[deckId];
+  if (!deck || !question.cards || question.cards.length === 0) return [];
+  const matches = [];
+  const terms = question.cards.filter(function(t) { return t && t.length >= 2; });
+  if (terms.length === 0) return [];
+  deck.cards.forEach(function(card) {
+    var sLower = card.s.toLowerCase();
+    for (var i = 0; i < terms.length; i++) {
+      if (sLower.includes(terms[i].toLowerCase())) {
+        matches.push(card);
+        break;
+      }
+    }
+  });
+  return matches;
+}
+
+/**
+ * decodeJumon: Jumon文字列をデコードする
+ * @param {string} jumonStr - "DEAv1:base64..." 形式の文字列
+ * @returns {{ banks: object }|null} デコード結果、または失敗時null
+ */
+function decodeJumon(jumonStr) {
+  var trimmed = (jumonStr || '').trim();
+  if (!trimmed.startsWith('DEAv1:')) return null;
+  try {
+    var b64 = trimmed.substring(6);
+    var json = atob(b64);
+    var data = JSON.parse(json);
+    // v2 format: { v:2, banks: {...}, amida: {...} }
+    if (data.banks && typeof data.banks === 'object') {
+      if (Object.keys(data.banks).length === 0) return null;
+      return { banks: data.banks };
+    }
+    // legacy v1 format: { seen: {...}, wrong: {...} }
+    if (data.wrong && typeof data.wrong === 'object') {
+      return { banks: { main: data } };
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * loadAllDrillQuestions: 各questions_*.jsファイルを読み込み、
+ * bankIdをキーとした問題データの辞書を返す。
+ * file://でも動くように<script>タグ方式を使用。
+ * @returns {Promise<Record<string, Array>>} bankId → DrillQuestion[] のマップ
+ */
+async function loadAllDrillQuestions() {
+  var files = {
+    main: 'questions.js',
+    v2: 'questions_v2.js',
+    v3: 'questions_v3.js'
+  };
+  var banks = {};
+  // scriptタグで順番に読み込み、グローバルQUESTIONSをコピーしていく
+  var origQ = (typeof QUESTIONS !== 'undefined') ? QUESTIONS : undefined;
+  for (var bankId of Object.keys(files)) {
+    try {
+      await new Promise(function(resolve, reject) {
+        var s = document.createElement('script');
+        s.src = files[bankId];
+        s.onload = function() {
+          if (typeof QUESTIONS !== 'undefined' && Array.isArray(QUESTIONS)) {
+            banks[bankId] = QUESTIONS;
+          }
+          document.head.removeChild(s);
+          resolve();
+        };
+        s.onerror = function() {
+          document.head.removeChild(s);
+          resolve(); // skip unavailable
+        };
+        document.head.appendChild(s);
+      });
+    } catch (e) { /* skip */ }
+  }
+  // グローバルQUESTIONSを復元（もし他で使われている場合の安全策）
+  if (origQ !== undefined) { QUESTIONS = origQ; }
+  return banks;
+}
+
+/**
+ * runImportPipeline: ドリル弱点インポートの全体パイプラインを実行する
+ * @param {string|object} source - 'local' または JumonPayload
+ * @returns {Promise<{totalWrongIds:number, matchedCount:number, generatedCount:number, skippedDuplicates:number, affectedDecks:Set, errors:string[]}>}
+ */
+async function runImportPipeline(source) {
+  var result = {
+    totalWrongIds: 0,
+    matchedCount: 0,
+    generatedCount: 0,
+    skippedDuplicates: 0,
+    affectedDecks: new Set(),
+    errors: []
+  };
+
+  // Step 1: 問題データのロード
+  var allQuestions = await loadAllDrillQuestions();
+
+  // Step 2: Wrong IDの収集
+  var wrongIds = extractWrongIds(source);
+  Object.values(wrongIds).forEach(function(ids) { result.totalWrongIds += ids.length; });
+  if (result.totalWrongIds === 0) return result;
+
+  // Step 3: EverWrongレコードのロード
+  var ever = loadEver();
+
+  // Step 4: 各Wrong_IDを処理
+  Object.keys(wrongIds).forEach(function(bankId) {
+    var questions = allQuestions[bankId];
+    if (!questions) return;
+    wrongIds[bankId].forEach(function(qId) {
+      var question = questions.find(function(q) { return String(q.id) === String(qId); });
+      if (!question) return;
+
+      var deckId = resolveDeck(question.cat);
+      result.affectedDecks.add(deckId);
+
+      // Concept Match
+      var matches = conceptMatch(question, deckId);
+
+      if (matches.length > 0) {
+        // Match found → mark as everWrong
+        matches.forEach(function(card) {
+          if (!ever[deckId]) ever[deckId] = [];
+          if (!ever[deckId].includes(card.s)) {
+            ever[deckId].push(card.s);
+            result.matchedCount++;
+          }
+        });
+      }
+      // マッチなしの場合はスキップ（手書きカードで別途対応）
+    });
+  });
+
+  // Step 5: Persist
+  try {
+    saveEver(ever);
+  } catch (e) {
+    result.errors.push('amida_everwrong_v1 の書き込みに失敗');
+  }
+
+  return result;
+}
+
+// ─── Import Tool UI Wiring ───
+(function() {
+  var btn = document.getElementById('import-btn');
+  var modal = document.getElementById('import-modal');
+  var confirmBtn = document.getElementById('import-confirm');
+  var cancelBtn = document.getElementById('import-cancel');
+  var statusEl = document.getElementById('import-status');
+  var jumonInput = document.getElementById('import-jumon');
+
+  if (btn) btn.onclick = function() {
+    modal.style.display = 'block';
+    statusEl.style.display = 'none';
+    if (jumonInput) jumonInput.value = '';
+  };
+
+  if (cancelBtn) cancelBtn.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  if (confirmBtn) confirmBtn.onclick = async function() {
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = '⏳ 処理中…';
+    statusEl.style.display = 'none';
+
+    var source;
+    var jumonText = (jumonInput && jumonInput.value || '').trim();
+    if (jumonText) {
+      var decoded = decodeJumon(jumonText);
+      if (!decoded) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = '#fdecec';
+        statusEl.style.color = '#b01212';
+        statusEl.textContent = '❌ じゅもんの形式が無効です。DEAv1:... で始まるデータを貼り付けてください。';
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = '取り込む';
+        return;
+      }
+      source = decoded;
+    } else {
+      source = 'local';
+    }
+
+    try {
+      var result = await runImportPipeline(source);
+      statusEl.style.display = 'block';
+      if (result.totalWrongIds === 0) {
+        statusEl.style.background = '#fffdf2';
+        statusEl.style.color = '#7a471a';
+        statusEl.textContent = 'ドリルに間違えた問題が見つかりませんでした。まずドリルで問題を解いてみましょう。';
+      } else {
+        var deckNames = [...result.affectedDecks].map(function(id) { return decks[id] ? decks[id].name : id; }).join('、');
+        var msg = '✅ 取り込み完了\n';
+        msg += '・間違い問題数: ' + result.totalWrongIds + '\n';
+        msg += '・間違えたものモードに追加: ' + result.matchedCount + '\n';
+        msg += '・対象デッキ: ' + deckNames;
+        if (result.errors.length > 0) msg += '\n⚠️ エラー: ' + result.errors.join(', ');
+        statusEl.style.background = '#eafaf0';
+        statusEl.style.color = '#183251';
+        statusEl.style.whiteSpace = 'pre-wrap';
+        statusEl.textContent = msg;
+        renderDecks();
+      }
+    } catch (e) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = '#fdecec';
+      statusEl.style.color = '#b01212';
+      statusEl.textContent = '❌ エラーが発生しました: ' + e.message;
+    }
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = '取り込む';
+  };
+})();
+
+</script>
+</body>
+</html>
