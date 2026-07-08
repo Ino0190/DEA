@@ -143,8 +143,9 @@ const decks = {
       {s:'ストリームデータをRedshiftに直接取り込みマテリアライズドビュー化',a:'Firehose経由でS3→COPY',b:'Redshift Streaming Ingestion',ans:'b',why:'Streaming Ingestion=<b>ストリームを直接Redshiftへ取り込み</b>。S3経由のバッチより低レイテンシ。',tip:'ストリーム→Redshift直接＝Streaming Ingestion。'},
       {s:'オンプレの大量ファイルを定期的にS3へ効率よく転送',a:'AWS DataSync',b:'AWS Transfer Family',ans:'a',why:'DataSync=<b>大量データの高速転送に特化</b>。Transfer FamilyはSFTP/FTPS窓口。',tip:'大量転送＝DataSync。SFTP受け口＝Transfer Family。'},
       {s:'100TB級を回線が細い拠点から物理デバイスでオフライン移行',a:'DataSync',b:'AWS Snowball',ans:'b',why:'Snowball=<b>物理デバイスでオフライン大容量移行</b>。回線が細い時に有効。',tip:'巨大＋細回線＝Snowball(物理搬送)。'},
-      {s:'Kafkaのスキーマ進化と互換性を一元管理したい',a:'Glue Schema Registry',b:'アプリ側で手動管理',ans:'a',why:'Glue Schema Registry=<b>スキーマ進化・互換性チェックを管理</b>。',tip:'スキーマ進化管理＝Glue Schema Registry。'},
-    
+      {s:'Kafkaのスキーマ進化と互換性を一元管理したい',a:'Glue Schema Registry',b:'アプリ側で手動管理',ans:'a',why:'Glue Schema Registry=<b>スキーマ進化・互換性チェックを管理</b>。',tip:'スキーマ進化管理＝Glue Schema Registry。'},,
+      {s:'DynamoDBテーブルの項目変更(挿入・更新・削除)を捕捉して下流へ連携したい',a:'DynamoDB Streams',b:'Kinesis Data Streams',ans:'b',why:'DynamoDBの変更捕捉は<b>DynamoDB Streams</b>。項目レベルの変更をLambda等へ。KDSは汎用ストリーム。',tip:'DynamoDBの変更を捕捉＝DynamoDB Streams。'},
+      {s:'小さなレコードが大量。PutRecordのPUT課金が膨らみスループットも頭打ち',a:'シャード数を増設',b:'KPL(Producer Library)の集約',ans:'b',why:'<b>KPL集約</b>で複数レコードを1つにまとめPUT回数を削減。消費側はKCL。増設はコスト増で本質解決でない。',tip:'小レコード大量でPUT課金＝KPL集約。'}
     ]
   },
   'transform': {
@@ -182,8 +183,10 @@ const decks = {
       {s:'DynamoDBを複数リージョンで双方向にレプリケート',a:'グローバルテーブル',b:'自前でクロスリージョン複製',ans:'a',why:'グローバルテーブル=<b>マルチリージョン双方向レプリケーション</b>をマネージド提供。',tip:'DynamoDBマルチリージョン＝グローバルテーブル。'},
       {s:'IoTの時系列データを自動階層化して保存・時間集計',a:'DynamoDB',b:'Amazon Timestream',ans:'b',why:'Timestream=<b>時系列専用DB</b>・メモリ/マグネティック層の自動階層化。',tip:'時系列専用＝Timestream。'},
       {s:'高カーディナリティ列で過剰パーティションを避けつつ等値検索を速く',a:'Bucketing（ハッシュ振り分け）',b:'その列でパーティション',ans:'a',why:'Bucketing=<b>ハッシュで固定数バケットに振り分け</b>・パーティション肥大を回避。',tip:'高カーディナリティ＝Bucketing(パーティションでなく)。'},
-      {s:'巨大なCSV/JSONの一部の列・行だけ取得してスキャン削減',a:'S3 Select',b:'オブジェクト全体をダウンロード',ans:'a',why:'S3 Select=<b>オブジェクト内を部分抽出</b>し転送量を削減。',tip:'一部だけ取り出す＝S3 Select。'},
-    
+      {s:'巨大なCSV/JSONの一部の列・行だけ取得してスキャン削減',a:'S3 Select',b:'オブジェクト全体をダウンロード',ans:'a',why:'S3 Select=<b>オブジェクト内を部分抽出</b>し転送量を削減。',tip:'一部だけ取り出す＝S3 Select。'},,
+      {s:'アクセス頻度が下がった古いデータを自動で安価な階層へ移し保持したい(頻度は予測可能)',a:'S3ライフサイクルポリシー',b:'S3 Intelligent-Tiering',ans:'a',why:'<b>ライフサイクル</b>=経過日数で自動階層移行/削除。頻度が読めるならこれ。読めない時はIntelligent-Tiering。',tip:'経過日数で自動アーカイブ＝ライフサイクル。'},
+      {s:'数十万パーティションの登録が遅く、カタログのメタデータも肥大している',a:'Glueクローラで逐次登録',b:'パーティション射影(partition projection)',ans:'b',why:'<b>射影</b>=命名規則からパーティションを動的算出。カタログ登録もクローラ実行も不要。',tip:'大量パーティションの登録遅延＝射影。'},
+      {s:'有効期限を過ぎたDynamoDBの項目を、追加キャパシティ無しで自動削除しスリムに保つ',a:'DynamoDB TTL',b:'定期起動のScan削除バッチ',ans:'a',why:'<b>TTL</b>=期限切れ項目を追加キャパシティ消費なしで自動削除。Scan削除はRCU/WCUとコード保守が重い。',tip:'期限切れ自動削除＝TTL。'}
     ]
   },
   'ops': {
@@ -200,8 +203,9 @@ const decks = {
       {s:'大量ログを対話的にクエリして障害を調査',a:'目視でログを確認',b:'CloudWatch Logs Insights',ans:'b',why:'Logs Insights=<b>ログを対話的にクエリ・集計</b>して原因調査。',tip:'ログ対話クエリ＝Logs Insights。'},
       {s:'高頻度・短時間で大量に走るワークフロー',a:'Step Functions Express',b:'Step Functions Standard',ans:'a',why:'Express=<b>高頻度・短時間・低コスト</b>。Standardは長時間・監査向き。',tip:'高頻度短時間＝Express。長時間監査＝Standard。'},
       {s:'データパイプラインを再現可能にコードで管理・デプロイ',a:'手動でコンソール構築',b:'CloudFormation / CDK',ans:'b',why:'IaC=<b>構成をコード化し再現可能にデプロイ</b>。',tip:'再現可能な構築＝IaC(CloudFormation/CDK)。'},
-      {s:'分散処理のどこが遅いか、サービス間をまたいで追跡',a:'AWS X-Ray',b:'勘とログ目視',ans:'a',why:'X-Ray=<b>分散トレース・サービスマップ</b>でボトルネック可視化。',tip:'分散トレース＝X-Ray。'},
-    
+      {s:'分散処理のどこが遅いか、サービス間をまたいで追跡',a:'AWS X-Ray',b:'勘とログ目視',ans:'a',why:'X-Ray=<b>分散トレース・サービスマップ</b>でボトルネック可視化。',tip:'分散トレース＝X-Ray。'},,
+      {s:'毒メッセージ(壊れたペイロード)でLambda処理が失敗し続け、キューが詰まる',a:'Lambdaのリトライ回数を増やす',b:'DLQ+maxReceiveCount',ans:'b',why:'<b>DLQ</b>=最大受信回数超過で自動退避し隔離、後から調査・再処理。リトライ増だけでは詰まりは解けない。',tip:'毒メッセージ隔離＝DLQ。'},
+      {s:'コスト傾向をサービス別・タグ別に可視化しつつ、予算超過をしきい値で自動通知したい',a:'Cost Anomaly Detection',b:'Cost Explorer+AWS Budgets',ans:'b',why:'<b>Cost Explorer(傾向可視化)+Budgets(予算しきい値アラート)</b>。異常検知は普段と違う急増用で予算管理とは別。',tip:'傾向可視化＋予算アラート＝CostExplorer+Budgets。'}
     ]
   },
   'security': {
@@ -218,8 +222,8 @@ const decks = {
       {s:'名寄せ可・生値を出さない・後で戻せる形で機密IDを保護',a:'一方向ハッシュ化',b:'トークナイゼーション',ans:'b',why:'トークナイゼーション=<b>可逆・参照整合性を保つ</b>置換。ハッシュは不可逆で戻せない。',tip:'可逆＋名寄せ＝トークナイゼーション。戻せないのはハッシュ。'},
       {s:'リソース構成がルールに準拠しているか継続評価・自動修復',a:'AWS Config',b:'手動で定期監査',ans:'a',why:'Config=<b>構成コンプライアンスを継続評価</b>＋自動修復連携。',tip:'構成コンプラ継続評価＝AWS Config。'},
       {s:'DR用に複数リージョンで同一の暗号化キーを使いたい',a:'リージョンごとに別々のキー',b:'KMSマルチリージョンキー',ans:'b',why:'マルチリージョンキー=<b>同一キーマテリアルを複数リージョンで</b>利用可。',tip:'複数リージョンで同一キー＝KMSマルチリージョンキー。'},
-      {s:'S3データを一定期間、改ざん・削除不可（WORM）で保持',a:'S3 Object Lock',b:'バケットポリシーで制限',ans:'a',why:'Object Lock=<b>WORM保持</b>で規制対応。ポリシーは外せてしまう。',tip:'改ざん削除不可＝S3 Object Lock(WORM)。'},
-    
+      {s:'S3データを一定期間、改ざん・削除不可（WORM）で保持',a:'S3 Object Lock',b:'バケットポリシーで制限',ans:'a',why:'Object Lock=<b>WORM保持</b>で規制対応。ポリシーは外せてしまう。',tip:'改ざん削除不可＝S3 Object Lock(WORM)。'},,
+      {s:'別アカウントの分析者に、テーブル/列単位で権限を絞ってデータを共有したい',a:'Lake Formationクロスアカウント共有',b:'S3へエクスポートしてコピー配布',ans:'a',why:'<b>LFクロスアカウント共有</b>=テーブル/列(データフィルタ)単位で権限付与・再委任・取消も容易。コピーは複製が残り制御不能。',tip:'別アカウントへ列単位共有＝LFクロスアカウント。'}
     ]
   }
 };
