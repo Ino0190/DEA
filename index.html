@@ -256,7 +256,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 
   <div class="modecard" onclick="openCrossWrong()" style="border-color:var(--accent)">
     <h3 style="color:var(--accent)">🌐 全セット横断で間違いを解き直す</h3>
-    <p>A〜D全バンクの間違いを分野で絞って解き直す。正解すれば各セットの「間違えた問題」から外れ、数字が動く。データ分析だけ・ネットワークだけ、と弱点を集中攻撃できる。</p>
+    <p>全バンクの間違いを分野で絞って解き直す。正解すれば各セットの「間違えた問題」から外れ、数字が動く。データ分析だけ・ネットワークだけ、と弱点を集中攻撃できる。</p>
     <div class="cnt" id="cntCross"></div>
   </div>
   <div class="modecard" onclick="startReview()">
@@ -380,7 +380,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 <div class="jmask" id="jmask" onclick="if(event.target===this)closeJumon()">
   <div class="jcard">
     <div class="jtitle">📜 ふっかつのじゅもん</div>
-    <p class="jlead">PCとスマホで進捗（学習済み・間違えた回数）を引き継げる。<br><b>A〜D 全セットまとめて</b>持ち運べます。片方で「じゅもんを書き写す」→もう片方で貼り付けて読み込むと、各セットごとに記録が合算されます。</p>
+    <p class="jlead">PCとスマホで進捗（学習済み・間違えた回数）を引き継げる。<br><b>全バンクまとめて</b>持ち運べます。片方で「じゅもんを書き写す」→もう片方で貼り付けて読み込むと、各セットごとに記録が合算されます。</p>
 
     <div class="jsec">
       <div class="jsech">① いまの進捗を じゅもんにする（書き写す側）</div>
@@ -405,7 +405,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(15,20,32,.95);backdrop-f
 </div>
 
 <script>
-// ===== 問題バンク切替（A=main / B=v2 / C=v3 / D=v4 / E=v5。各セットの件数はホームの「全セットの進捗」に動的表示）=====
+// ===== 問題バンク切替（現行はA=main/B=v2/C=v3の3バンク。BANKS定義に追記すれば増やせる。各セットの件数はホームの「全セットの進捗」に動的表示）=====
 const BANKS={
   main:{file:'questions.js', label:'A・v1.1改良65問'},
   v2:{file:'questions_v2.js', label:'B・v1.1改良65問'},
@@ -1145,7 +1145,7 @@ function loadAllBanks(cb){
 }
 function bankProgFor(b){return b===currentBank()?progress:readBankProg(b);}
 function buildWeaknessPrompt(){
-  // 全セット(A〜D)横断
+  // 全セット横断
   let total=0,seen=0,seenCorrect=0;
   const cats={};const wrongAll=[];
   Object.keys(BANKS).forEach(b=>{
@@ -1513,7 +1513,7 @@ function mergeProg(cur,inc){
   return merged;
 }
 function genJumon(){
-  // 全問題セット（A〜D）の進捗をまとめて1つのじゅもんにする
+  // 全問題セットの進捗をまとめて1つのじゅもんにする
   const banks={};
   Object.keys(BANKS).forEach(b=>{
     banks[b]=(b===currentBank())
@@ -1578,7 +1578,7 @@ function applyJumon(){
       try{localStorage.setItem('dea_amida_everwrong_v1',JSON.stringify(cur));}catch(e){}
     }
     saveProgress();renderHome();closeJumon();
-    alert('✨ 全'+touched+'セットを復元しました（履歴は消えません）\n\n'+lines.join('\n')+(amidaMerged?'\n・⚡どっち：+'+amidaMerged+'枚':'')+'\n\n※ホームは「いま選んでいる問題セット」だけを表示します。上の A〜E を切り替えると各セットの復元内容が見られます。');
+    alert('✨ 全'+touched+'セットを復元しました（履歴は消えません）\n\n'+lines.join('\n')+(amidaMerged?'\n・⚡どっち：+'+amidaMerged+'枚':'')+'\n\n※ホームは「いま選んでいる問題セット」だけを表示します。上のバンクを切り替えると各セットの復元内容が見られます。');
     return;
   }
   // 旧・単一バンク版：今選んでいるセットに合算

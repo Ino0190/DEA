@@ -181,11 +181,9 @@ const decks = {
       {s:'複数チームでRedshiftのデータをコピーせず共有したい',a:'Redshiftデータ共有（Data Sharing）',b:'UNLOADして配布',ans:'a',why:'Data Sharing=<b>コピーせずライブに共有</b>。',tip:'コピーなし共有＝Redshift Data Sharing。'},
       {s:'DynamoDBの読み取りをマイクロ秒級に高速化',a:'ElastiCacheを自前構築',b:'DynamoDB Accelerator（DAX）',ans:'b',why:'DAX=<b>DynamoDB専用インメモリキャッシュ</b>・マイクロ秒応答。',tip:'DynamoDB読み取り高速化＝DAX。'},
       {s:'DynamoDBを複数リージョンで双方向にレプリケート',a:'グローバルテーブル',b:'自前でクロスリージョン複製',ans:'a',why:'グローバルテーブル=<b>マルチリージョン双方向レプリケーション</b>をマネージド提供。',tip:'DynamoDBマルチリージョン＝グローバルテーブル。'},
-      {s:'IoTの時系列データを自動階層化して保存・時間集計',a:'DynamoDB',b:'Amazon Timestream',ans:'b',why:'Timestream=<b>時系列専用DB</b>・メモリ/マグネティック層の自動階層化。',tip:'時系列専用＝Timestream。'},
       {s:'業務データを既存アプリからSQLで結合・集計・トランザクション更新したい',a:'Amazon Aurora PostgreSQL',b:'Amazon OpenSearch Service',ans:'a',why:'Aurora PostgreSQL=<b>SQLで業務データを結合・集計するRDB</b>。OpenSearchは全文検索・ログ分析・可視化に強い検索エンジン。',tip:'SQLで結合/更新＝Aurora。全文検索/ログ可視化＝OpenSearch。'},
       {s:'高カーディナリティ列で過剰パーティションを避けつつ等値検索を速く',a:'Bucketing（ハッシュ振り分け）',b:'その列でパーティション',ans:'a',why:'Bucketing=<b>ハッシュで固定数バケットに振り分け</b>・パーティション肥大を回避。',tip:'高カーディナリティ＝Bucketing(パーティションでなく)。'},
-      {s:'巨大なCSV/JSONの一部の列・行だけ取得してスキャン削減',a:'S3 Select',b:'オブジェクト全体をダウンロード',ans:'a',why:'S3 Select=<b>オブジェクト内を部分抽出</b>し転送量を削減。',tip:'一部だけ取り出す＝S3 Select。'},
-      {s:'S3上のCSV/Parquetを複数オブジェクト横断でSQL集計・結合したい',a:'S3 Select',b:'Amazon Athena',ans:'b',why:'Athena=<b>複数オブジェクトを横断してSQL集計・結合</b>できるサーバーレスクエリ。S3 Selectは単一オブジェクト内の部分抽出のみ。',tip:'横断SQL＝Athena。単一オブジェクト部分抽出＝S3 Select。'},
+      {s:'S3上のCSV/Parquetをスキャン量最小でSQL集計したい',a:'Amazon Athena（列指向Parquet+パーティション）',b:'CSVのままAthenaでSELECT *',ans:'a',why:'<b>列指向Parquet+パーティション+必要列だけSELECT</b>でスキャン量とコストを大幅削減。CSV+SELECT *は全件フルスキャン。',tip:'スキャン量削減＝Parquet+パーティション+必要列だけ。'},
       {s:'アクセス頻度が下がった古いデータを自動で安価な階層へ移し保持したい(頻度は予測可能)',a:'S3ライフサイクルポリシー',b:'S3 Intelligent-Tiering',ans:'a',why:'<b>ライフサイクル</b>=経過日数で自動階層移行/削除。頻度が読めるならこれ。読めない時はIntelligent-Tiering。',tip:'経過日数で自動アーカイブ＝ライフサイクル。'},
       {s:'数十万パーティションの登録が遅く、カタログのメタデータも肥大している',a:'Glueクローラで逐次登録',b:'パーティション射影(partition projection)',ans:'b',why:'<b>射影</b>=命名規則からパーティションを動的算出。カタログ登録もクローラ実行も不要。',tip:'大量パーティションの登録遅延＝射影。'},
       {s:'有効期限を過ぎたDynamoDBの項目を、追加キャパシティ無しで自動削除しスリムに保つ',a:'DynamoDB TTL',b:'定期起動のScan削除バッチ',ans:'a',why:'<b>TTL</b>=期限切れ項目を追加キャパシティ消費なしで自動削除。Scan削除はRCU/WCUとコード保守が重い。',tip:'期限切れ自動削除＝TTL。'}
@@ -205,7 +203,6 @@ const decks = {
       {s:'大量ログを対話的にクエリして障害を調査',a:'目視でログを確認',b:'CloudWatch Logs Insights',ans:'b',why:'Logs Insights=<b>ログを対話的にクエリ・集計</b>して原因調査。',tip:'ログ対話クエリ＝Logs Insights。'},
       {s:'高頻度・短時間で大量に走るワークフロー',a:'Step Functions Express',b:'Step Functions Standard',ans:'a',why:'Express=<b>高頻度・短時間・低コスト</b>。Standardは長時間・監査向き。',tip:'高頻度短時間＝Express。長時間監査＝Standard。'},
       {s:'データパイプラインを再現可能にコードで管理・デプロイ',a:'手動でコンソール構築',b:'CloudFormation / CDK',ans:'b',why:'IaC=<b>構成をコード化し再現可能にデプロイ</b>。',tip:'再現可能な構築＝IaC(CloudFormation/CDK)。'},
-      {s:'分散処理のどこが遅いか、サービス間をまたいで追跡',a:'AWS X-Ray',b:'勘とログ目視',ans:'a',why:'X-Ray=<b>分散トレース・サービスマップ</b>でボトルネック可視化。',tip:'分散トレース＝X-Ray。'},
       {s:'誰がいつどんなAWS API操作を行ったかを追跡・監査したい',a:'AWS CloudTrail',b:'Amazon CloudWatch Logs',ans:'a',why:'CloudTrail=<b>API操作の証跡(誰が/いつ/何を)</b>を記録。CloudWatch Logsはアプリ/リソースの実行ログ。',tip:'API操作の監査＝CloudTrail。アプリ/実行ログ＝CloudWatch Logs。'},
       {s:'毒メッセージ(壊れたペイロード)でLambda処理が失敗し続け、キューが詰まる',a:'Lambdaのリトライ回数を増やす',b:'DLQ+maxReceiveCount',ans:'b',why:'<b>DLQ</b>=最大受信回数超過で自動退避し隔離、後から調査・再処理。リトライ増だけでは詰まりは解けない。',tip:'毒メッセージ隔離＝DLQ。'},
       {s:'コスト傾向をサービス別・タグ別に可視化しつつ、予算超過をしきい値で自動通知したい',a:'Cost Anomaly Detection',b:'Cost Explorer+AWS Budgets',ans:'b',why:'<b>Cost Explorer(傾向可視化)+Budgets(予算しきい値アラート)</b>。異常検知は普段と違う急増用で予算管理とは別。',tip:'傾向可視化＋予算アラート＝CostExplorer+Budgets。'}
