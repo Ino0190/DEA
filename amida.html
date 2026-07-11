@@ -143,8 +143,8 @@ const decks = {
       {s:'ストリームデータをRedshiftに直接取り込みマテリアライズドビュー化',a:'Firehose経由でS3→COPY',b:'Redshift Streaming Ingestion',ans:'b',why:'Streaming Ingestion=<b>ストリームを直接Redshiftへ取り込み</b>。S3経由のバッチより低レイテンシ。',tip:'ストリーム→Redshift直接＝Streaming Ingestion。'},
       {s:'オンプレの大量ファイルを定期的にS3へ効率よく転送',a:'AWS DataSync',b:'AWS Transfer Family',ans:'a',why:'DataSync=<b>大量データの高速転送に特化</b>。Transfer FamilyはSFTP/FTPS窓口。',tip:'大量転送＝DataSync。SFTP受け口＝Transfer Family。'},
       {s:'100TB級を回線が細い拠点から物理デバイスでオフライン移行',a:'DataSync',b:'AWS Snowball',ans:'b',why:'Snowball=<b>物理デバイスでオフライン大容量移行</b>。回線が細い時に有効。',tip:'巨大＋細回線＝Snowball(物理搬送)。'},
-      {s:'Kafkaのスキーマ進化と互換性を一元管理したい',a:'Glue Schema Registry',b:'アプリ側で手動管理',ans:'a',why:'Glue Schema Registry=<b>スキーマ進化・互換性チェックを管理</b>。',tip:'スキーマ進化管理＝Glue Schema Registry。'},,
-      {s:'DynamoDBテーブルの項目変更(挿入・更新・削除)を捕捉して下流へ連携したい',a:'DynamoDB Streams',b:'Kinesis Data Streams',ans:'b',why:'DynamoDBの変更捕捉は<b>DynamoDB Streams</b>。項目レベルの変更をLambda等へ。KDSは汎用ストリーム。',tip:'DynamoDBの変更を捕捉＝DynamoDB Streams。'},
+      {s:'Kafkaのスキーマ進化と互換性を一元管理したい',a:'Glue Schema Registry',b:'アプリ側で手動管理',ans:'a',why:'Glue Schema Registry=<b>スキーマ進化・互換性チェックを管理</b>。',tip:'スキーマ進化管理＝Glue Schema Registry。'},
+      {s:'DynamoDBテーブルの項目変更(挿入・更新・削除)を捕捉して下流へ連携したい',a:'DynamoDB Streams',b:'Kinesis Data Streams',ans:'a',why:'DynamoDBの変更捕捉は<b>DynamoDB Streams</b>。項目レベルの変更をLambda等へ。KDSは汎用ストリーム。',tip:'DynamoDBの変更を捕捉＝DynamoDB Streams。'},
       {s:'小さなレコードが大量。PutRecordのPUT課金が膨らみスループットも頭打ち',a:'シャード数を増設',b:'KPL(Producer Library)の集約',ans:'b',why:'<b>KPL集約</b>で複数レコードを1つにまとめPUT回数を削減。消費側はKCL。増設はコスト増で本質解決でない。',tip:'小レコード大量でPUT課金＝KPL集約。'}
     ]
   },
@@ -182,8 +182,10 @@ const decks = {
       {s:'DynamoDBの読み取りをマイクロ秒級に高速化',a:'ElastiCacheを自前構築',b:'DynamoDB Accelerator（DAX）',ans:'b',why:'DAX=<b>DynamoDB専用インメモリキャッシュ</b>・マイクロ秒応答。',tip:'DynamoDB読み取り高速化＝DAX。'},
       {s:'DynamoDBを複数リージョンで双方向にレプリケート',a:'グローバルテーブル',b:'自前でクロスリージョン複製',ans:'a',why:'グローバルテーブル=<b>マルチリージョン双方向レプリケーション</b>をマネージド提供。',tip:'DynamoDBマルチリージョン＝グローバルテーブル。'},
       {s:'IoTの時系列データを自動階層化して保存・時間集計',a:'DynamoDB',b:'Amazon Timestream',ans:'b',why:'Timestream=<b>時系列専用DB</b>・メモリ/マグネティック層の自動階層化。',tip:'時系列専用＝Timestream。'},
+      {s:'業務データを既存アプリからSQLで結合・集計・トランザクション更新したい',a:'Amazon Aurora PostgreSQL',b:'Amazon OpenSearch Service',ans:'a',why:'Aurora PostgreSQL=<b>SQLで業務データを結合・集計するRDB</b>。OpenSearchは全文検索・ログ分析・可視化に強い検索エンジン。',tip:'SQLで結合/更新＝Aurora。全文検索/ログ可視化＝OpenSearch。'},
       {s:'高カーディナリティ列で過剰パーティションを避けつつ等値検索を速く',a:'Bucketing（ハッシュ振り分け）',b:'その列でパーティション',ans:'a',why:'Bucketing=<b>ハッシュで固定数バケットに振り分け</b>・パーティション肥大を回避。',tip:'高カーディナリティ＝Bucketing(パーティションでなく)。'},
-      {s:'巨大なCSV/JSONの一部の列・行だけ取得してスキャン削減',a:'S3 Select',b:'オブジェクト全体をダウンロード',ans:'a',why:'S3 Select=<b>オブジェクト内を部分抽出</b>し転送量を削減。',tip:'一部だけ取り出す＝S3 Select。'},,
+      {s:'巨大なCSV/JSONの一部の列・行だけ取得してスキャン削減',a:'S3 Select',b:'オブジェクト全体をダウンロード',ans:'a',why:'S3 Select=<b>オブジェクト内を部分抽出</b>し転送量を削減。',tip:'一部だけ取り出す＝S3 Select。'},
+      {s:'S3上のCSV/Parquetを複数オブジェクト横断でSQL集計・結合したい',a:'S3 Select',b:'Amazon Athena',ans:'b',why:'Athena=<b>複数オブジェクトを横断してSQL集計・結合</b>できるサーバーレスクエリ。S3 Selectは単一オブジェクト内の部分抽出のみ。',tip:'横断SQL＝Athena。単一オブジェクト部分抽出＝S3 Select。'},
       {s:'アクセス頻度が下がった古いデータを自動で安価な階層へ移し保持したい(頻度は予測可能)',a:'S3ライフサイクルポリシー',b:'S3 Intelligent-Tiering',ans:'a',why:'<b>ライフサイクル</b>=経過日数で自動階層移行/削除。頻度が読めるならこれ。読めない時はIntelligent-Tiering。',tip:'経過日数で自動アーカイブ＝ライフサイクル。'},
       {s:'数十万パーティションの登録が遅く、カタログのメタデータも肥大している',a:'Glueクローラで逐次登録',b:'パーティション射影(partition projection)',ans:'b',why:'<b>射影</b>=命名規則からパーティションを動的算出。カタログ登録もクローラ実行も不要。',tip:'大量パーティションの登録遅延＝射影。'},
       {s:'有効期限を過ぎたDynamoDBの項目を、追加キャパシティ無しで自動削除しスリムに保つ',a:'DynamoDB TTL',b:'定期起動のScan削除バッチ',ans:'a',why:'<b>TTL</b>=期限切れ項目を追加キャパシティ消費なしで自動削除。Scan削除はRCU/WCUとコード保守が重い。',tip:'期限切れ自動削除＝TTL。'}
@@ -203,7 +205,8 @@ const decks = {
       {s:'大量ログを対話的にクエリして障害を調査',a:'目視でログを確認',b:'CloudWatch Logs Insights',ans:'b',why:'Logs Insights=<b>ログを対話的にクエリ・集計</b>して原因調査。',tip:'ログ対話クエリ＝Logs Insights。'},
       {s:'高頻度・短時間で大量に走るワークフロー',a:'Step Functions Express',b:'Step Functions Standard',ans:'a',why:'Express=<b>高頻度・短時間・低コスト</b>。Standardは長時間・監査向き。',tip:'高頻度短時間＝Express。長時間監査＝Standard。'},
       {s:'データパイプラインを再現可能にコードで管理・デプロイ',a:'手動でコンソール構築',b:'CloudFormation / CDK',ans:'b',why:'IaC=<b>構成をコード化し再現可能にデプロイ</b>。',tip:'再現可能な構築＝IaC(CloudFormation/CDK)。'},
-      {s:'分散処理のどこが遅いか、サービス間をまたいで追跡',a:'AWS X-Ray',b:'勘とログ目視',ans:'a',why:'X-Ray=<b>分散トレース・サービスマップ</b>でボトルネック可視化。',tip:'分散トレース＝X-Ray。'},,
+      {s:'分散処理のどこが遅いか、サービス間をまたいで追跡',a:'AWS X-Ray',b:'勘とログ目視',ans:'a',why:'X-Ray=<b>分散トレース・サービスマップ</b>でボトルネック可視化。',tip:'分散トレース＝X-Ray。'},
+      {s:'誰がいつどんなAWS API操作を行ったかを追跡・監査したい',a:'AWS CloudTrail',b:'Amazon CloudWatch Logs',ans:'a',why:'CloudTrail=<b>API操作の証跡(誰が/いつ/何を)</b>を記録。CloudWatch Logsはアプリ/リソースの実行ログ。',tip:'API操作の監査＝CloudTrail。アプリ/実行ログ＝CloudWatch Logs。'},
       {s:'毒メッセージ(壊れたペイロード)でLambda処理が失敗し続け、キューが詰まる',a:'Lambdaのリトライ回数を増やす',b:'DLQ+maxReceiveCount',ans:'b',why:'<b>DLQ</b>=最大受信回数超過で自動退避し隔離、後から調査・再処理。リトライ増だけでは詰まりは解けない。',tip:'毒メッセージ隔離＝DLQ。'},
       {s:'コスト傾向をサービス別・タグ別に可視化しつつ、予算超過をしきい値で自動通知したい',a:'Cost Anomaly Detection',b:'Cost Explorer+AWS Budgets',ans:'b',why:'<b>Cost Explorer(傾向可視化)+Budgets(予算しきい値アラート)</b>。異常検知は普段と違う急増用で予算管理とは別。',tip:'傾向可視化＋予算アラート＝CostExplorer+Budgets。'}
     ]
@@ -222,8 +225,37 @@ const decks = {
       {s:'名寄せ可・生値を出さない・後で戻せる形で機密IDを保護',a:'一方向ハッシュ化',b:'トークナイゼーション',ans:'b',why:'トークナイゼーション=<b>可逆・参照整合性を保つ</b>置換。ハッシュは不可逆で戻せない。',tip:'可逆＋名寄せ＝トークナイゼーション。戻せないのはハッシュ。'},
       {s:'リソース構成がルールに準拠しているか継続評価・自動修復',a:'AWS Config',b:'手動で定期監査',ans:'a',why:'Config=<b>構成コンプライアンスを継続評価</b>＋自動修復連携。',tip:'構成コンプラ継続評価＝AWS Config。'},
       {s:'DR用に複数リージョンで同一の暗号化キーを使いたい',a:'リージョンごとに別々のキー',b:'KMSマルチリージョンキー',ans:'b',why:'マルチリージョンキー=<b>同一キーマテリアルを複数リージョンで</b>利用可。',tip:'複数リージョンで同一キー＝KMSマルチリージョンキー。'},
-      {s:'S3データを一定期間、改ざん・削除不可（WORM）で保持',a:'S3 Object Lock',b:'バケットポリシーで制限',ans:'a',why:'Object Lock=<b>WORM保持</b>で規制対応。ポリシーは外せてしまう。',tip:'改ざん削除不可＝S3 Object Lock(WORM)。'},,
+      {s:'S3データを一定期間、改ざん・削除不可（WORM）で保持',a:'S3 Object Lock',b:'バケットポリシーで制限',ans:'a',why:'Object Lock=<b>WORM保持</b>で規制対応。ポリシーは外せてしまう。',tip:'改ざん削除不可＝S3 Object Lock(WORM)。'},
       {s:'別アカウントの分析者に、テーブル/列単位で権限を絞ってデータを共有したい',a:'Lake Formationクロスアカウント共有',b:'S3へエクスポートしてコピー配布',ans:'a',why:'<b>LFクロスアカウント共有</b>=テーブル/列(データフィルタ)単位で権限付与・再委任・取消も容易。コピーは複製が残り制御不能。',tip:'別アカウントへ列単位共有＝LFクロスアカウント。'}
+    ]
+  },
+  'genai_v11': {
+    name: '🤖 生成AI・ベクトル・v1.1',
+    cards: [
+      {s:'ETLエンジンが参照するテーブル定義・パーティション・スキーマを管理',a:'AWS Glue Data Catalog',b:'Amazon SageMaker Catalog',ans:'a',why:'Glue Data Catalogは<b>技術メタデータのカタログ</b>。SageMaker Catalogはデータ製品・所有者・説明・購読などを扱うビジネスカタログ。',tip:'処理が読む表定義＝Glue。人が探して購読＝SageMaker Catalog。'},
+      {s:'外部のデータ提供事業者が公開するデータセットを購読してAWSへ取り込む',a:'Amazon SageMaker Catalog',b:'AWS Data Exchange',ans:'b',why:'AWS Data Exchange=<b>サードパーティデータの検索・購読・配信</b>。SageMaker Catalogは組織内データ資産の発見とガバナンス。',tip:'社外データを購読＝Data Exchange。社内データを探す＝Catalog。'},
+      {s:'社内のデータ製品を検索し、所有者や説明を確認して利用申請する',a:'AWS Glue Data Catalog',b:'Amazon SageMaker Catalog',c:'AWS Data Exchange',ans:'b',why:'Glue Data Catalogは技術メタデータ、<b>SageMaker Catalogは社内データ製品の発見・購読</b>、Data Exchangeは外部データの購読。',tip:'表定義＝Glue。社内データ製品＝SageMaker Catalog。社外データ＝Data Exchange。'},
+      {s:'Icebergテーブルのコンパクションやスナップショット管理をできるだけ自動化したい',a:'通常のS3バケットにIcebergを自前構築',b:'Amazon S3 Tables',ans:'b',why:'S3 Tables=<b>表形式データ向けにIcebergテーブルの保守をマネージド化</b>。通常のS3では最適化処理を利用者側で管理する。',tip:'Icebergを自分で運用＝S3。保守込み＝S3 Tables。'},
+      {s:'ベクトル検索の低レイテンシと再現率を優先し、インデックス用メモリ増加を許容できる',a:'HNSW',b:'IVF',ans:'a',why:'HNSW=<b>高い検索性能と再現率</b>を得やすいが、メモリと構築コストが大きい。IVFは比較的軽量だがクラスタ数や探索数の調整が必要。',tip:'速さ・精度優先＝HNSW。軽さ・調整可能＝IVF。'},
+      {s:'社内文書をベクトル化し、基盤モデルへ関連文書を渡してRAG回答を生成',a:'Amazon Kendra',b:'Amazon Bedrock Knowledge Bases',ans:'b',why:'Bedrock Knowledge Bases=<b>埋め込み・検索・基盤モデルへのコンテキスト連携</b>を行う。Kendraは企業内検索サービス。',tip:'検索結果を人に表示＝Kendra。検索結果をLLMへ渡す＝Bedrock Knowledge Bases。'},
+      {s:'生成AIアプリが社内文書を検索し、関連チャンクを基盤モデルへ渡す',a:'Amazon Kendra',b:'Amazon Bedrock Knowledge Bases',c:'Amazon OpenSearch Service',ans:'b',why:'<b>Bedrock Knowledge BasesはRAG構成を管理</b>する。Kendraは企業検索、OpenSearchは検索エンジンやベクトル検索基盤として利用する。',tip:'企業検索＝Kendra。RAG管理＝Knowledge Bases。検索基盤＝OpenSearch。'},
+      {s:'GlueのETLコード作成やSQL生成を、開発者向けAI支援で効率化',a:'Amazon Q',b:'Amazon Bedrock',ans:'a',why:'Amazon Q=<b>開発作業やAWSサービス利用を支援</b>。Bedrockは生成AIアプリやAI処理機能を構築するための基盤。',tip:'作る人を支援＝Q。AI機能そのものを作る＝Bedrock。'},
+      {s:'数百万件の商品説明を夜間にまとめて生成する。即時応答は不要',a:'Bedrockのオンデマンド推論',b:'Bedrockのバッチ推論',ans:'b',why:'バッチ推論=<b>大量データを非同期に一括処理</b>。対話や即時応答にはオンデマンド推論を使う。',tip:'その場で回答＝オンデマンド。大量に後処理＝バッチ。'},
+      {s:'既存のPostgreSQLデータとベクトルを同一トランザクション内で扱い、SQLで検索したい',a:'Amazon Aurora PostgreSQL＋pgvector',b:'Amazon OpenSearch Service',ans:'a',why:'Aurora PostgreSQL＋pgvector=<b>リレーショナルデータとベクトルを同じDBで管理</b>。OpenSearchは全文検索や大規模検索分析に強い。',tip:'SQLと既存業務データを一体管理＝Aurora+pgvector。検索専用基盤＝OpenSearch。'}
+    ]
+  },
+  'newsvc_v11': {
+    name: '🆕 新出サービス・設計判断',
+    cards: [
+      {s:'DynamoDBの読み取りだけをマイクロ秒級に高速化したい',a:'Amazon MemoryDB',b:'DynamoDB Accelerator（DAX）',ans:'b',why:'DAX=<b>DynamoDB専用キャッシュ</b>。MemoryDBはRedis互換の耐久性を持つ独立したインメモリデータベース。',tip:'DynamoDB専用＝DAX。独立した高速KVS＝MemoryDB。'},
+      {s:'特定Lambdaが同時実行枠を使い切らないよう上限を設定し、他の関数を保護',a:'予約済み同時実行',b:'プロビジョンド同時実行',ans:'a',why:'予約済み同時実行=<b>同時実行数の確保と上限設定</b>。プロビジョンド同時実行は事前初期化してコールドスタートを減らす。',tip:'枠を制御＝予約済み。待ち時間を削減＝プロビジョンド。'},
+      {s:'PythonやSparkライブラリを使い、対話的にデータを探索・加工したい',a:'Athena SQLエディタ',b:'Athena for Apache Spark',ans:'b',why:'Athena for Apache Spark=<b>ノートブック上でPySparkを実行</b>。通常のAthenaはSQL分析向け。',tip:'SQLだけ＝Athena。Python・Spark＝Athena for Spark。'},
+      {s:'一部の結合キーにデータが極端に集中し、特定Sparkタスクだけ遅い',a:'ブロードキャストジョイン',b:'ソルティングでキーを分散',ans:'b',why:'データスキューには<b>キーへ値を追加して複数パーティションへ分散</b>する。ブロードキャストは一方のテーブルが十分小さい場合に使う。',tip:'小テーブルを配る＝ブロードキャスト。偏ったキーを散らす＝ソルティング。'},
+      {s:'地域ごとの少数グループも必ず一定割合含めてサンプリング',a:'単純無作為抽出',b:'層化抽出',ans:'b',why:'層化抽出=<b>グループごとに分割して抽出</b>。少数グループも代表させられる。',tip:'全体からランダム＝無作為。各グループを残す＝層化。'},
+      {s:'IAMプリンシパルとAWSリソースのタグを照合して、多数のリソースへの権限を自動化',a:'IAMのABAC',b:'Lake FormationのLF-Tags',ans:'a',why:'ABAC=<b>IAM主体とAWSリソースの属性</b>で認可。LF-Tagsはデータカタログのデータベース・テーブル・列を分類して認可する。',tip:'AWSリソース全般＝ABAC。データレイクの表・列＝LF-Tags。'},
+      {s:'同じS3バケットに対し、アプリごとに異なるアクセス方針と専用エンドポイントを持たせる',a:'S3 Access Point',b:'VPCエンドポイント',ans:'a',why:'S3 Access Point=<b>利用者・アプリ別のS3アクセス窓口とポリシー</b>。VPCエンドポイントはAWSサービスへ非公開通信する経路。',tip:'S3の入口を分ける＝Access Point。インターネットを通さない＝VPC endpoint。'},
+      {s:'AWSへ送信する前にクライアント側で暗号化し、AWS側にも平文を渡したくない',a:'TLSによる転送中暗号化',b:'クライアント側暗号化',ans:'b',why:'TLS=<b>通信路</b>を暗号化。クライアント側暗号化は送信前にデータ自体を暗号化する。',tip:'道を暗号化＝TLS。荷物そのものを先に暗号化＝クライアント側。'},
+      {s:'特定の分析チームがデータ・ツール・権限をまとめて利用する作業単位',a:'ドメイン',b:'ドメインユニット',c:'プロジェクト',ans:'c',why:'ドメインは組織全体の管理境界、ドメインユニットは部門などの階層、<b>プロジェクトは実際の作業・共同利用単位</b>。',tip:'全体の境界＝ドメイン。組織階層＝ドメインユニット。作業場所＝プロジェクト。'}
     ]
   }
 };
