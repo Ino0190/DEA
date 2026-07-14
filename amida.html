@@ -132,9 +132,9 @@ const decks = {
       {s:'保持期間内に複数コンシューマーが同じストリームを独立に再読み込み（リプレイ）',a:'Kinesis Data Streams',b:'Kinesis Data Firehose',ans:'a',why:'KDS=<b>保持期間内で再読み＋複数独立読み</b>。Firehoseは配信するだけで溜めて読み直せない。',tip:'リプレイ・複数独立読み＝KDS(溜めた水を各自コップで何度でも)。'},
       {s:'変換・圧縮こみでS3やRedshiftへサーバーレスに配信（コードを書きたくない）',a:'Kinesis Data Firehose',b:'Kinesis Data Streams',ans:'a',why:'Firehose=<b>配信特化・フルマネージド</b>。バッファリング・変換・圧縮を内蔵。',tip:'配信特化・コード不要＝Firehose(蛇口から直接バケツへ)。'},
       {s:'既存のApache Kafka資産（API互換必須）をそのままマネージドに移したい',a:'Amazon MSK',b:'Kinesis Data Streams',ans:'a',why:'MSK=<b>Kafka互換</b>で既存資産をそのまま。KinesisはAWS独自API。',tip:'Kafka互換＝MSK。独自APIで良ければKinesis。'},
-      {s:'各コンシューマーに専用スループット（他の読み手の影響を受けない）が欲しい',a:'標準コンシューマー',b:'拡張ファンアウト（Enhanced Fan-Out）',ans:'b',why:'拡張ファンアウト=<b>コンシューマーごとに2MB/秒を専有</b>・低レイテンシ。',tip:'専用スループット＝拡張ファンアウト。共有で足りるなら標準。'},
+      {s:'各コンシューマーに専用スループット（他の読み手の影響を受けない）が欲しい',a:'標準コンシューマー',b:'拡張ファンアウト（Enhanced Fan-Out）',ans:'b',why:'拡張ファンアウト=<b>シャードあたり2MB/秒を各コンシューマーが専有</b>・プッシュ配信で低レイテンシ。標準は全コンシューマーで2MB/秒/シャードを共有する。',tip:'専用スループット＝拡張ファンアウト。共有で足りるなら標準。'},
       {s:'オンプレDBの変更を継続的にキャプチャ（CDC）してS3へレプリケート',a:'AWS DMS',b:'AWS Glue',ans:'a',why:'DMS=<b>全ロード＋CDC</b>で継続レプリケート。Glueは変換ETL用。',tip:'DBのCDC・移行＝DMS。'},
-      {s:'Salesforce等のSaaSからノーコードでデータを取り込みたい',a:'Kinesis Data Firehose',b:'Amazon AppFlow',ans:'b',why:'AppFlow=<b>SaaSコネクタ・ノーコード</b>連携。',tip:'SaaS連携ノーコード＝AppFlow。'},
+      {s:'Salesforce等のSaaSからノーコードでデータを取り込みたい',a:'Kinesis Data Firehose',b:'Amazon AppFlow',ans:'b',why:'AppFlow=<b>SaaSコネクタ・ノーコード</b>連携。FirehoseはSaaSコネクタを持たず、ストリームデータの配信専用。',tip:'SaaS連携ノーコード＝AppFlow。ストリーム配信＝Firehose。'},
       {s:'ストリームにリアルタイムでウィンドウ集計（直近5分の合計など）を行う',a:'Managed Service for Apache Flink',b:'Kinesis Data Firehose',ans:'a',why:'Flink=<b>継続クエリ・ストリーム集計</b>。Firehoseは配信のみ。',tip:'ストリームのウィンドウ集計＝Flink。'},
       {s:'ストリーム取り込み量が予測不能で急変する。シャード管理をしたくない',a:'KDS プロビジョンドモード',b:'KDS オンデマンドモード',ans:'b',why:'オンデマンド=<b>シャードを自動スケール</b>・容量管理不要。',tip:'容量が読めない・管理したくない＝オンデマンド。'},
       {s:'Kafkaを使いたいがブローカー容量の管理もしたくない',a:'MSK Serverless',b:'MSK プロビジョンド',ans:'a',why:'MSK Serverless=<b>容量管理不要</b>で自動スケール。',tip:'Kafka＋容量管理ゼロ＝MSK Serverless。'},
@@ -143,8 +143,8 @@ const decks = {
       {s:'ストリームデータをRedshiftに直接取り込みマテリアライズドビュー化',a:'Firehose経由でS3→COPY',b:'Redshift Streaming Ingestion',ans:'b',why:'Streaming Ingestion=<b>ストリームを直接Redshiftへ取り込み</b>。S3経由のバッチより低レイテンシ。',tip:'ストリーム→Redshift直接＝Streaming Ingestion。'},
       {s:'オンプレの大量ファイルを定期的にS3へ効率よく転送',a:'AWS DataSync',b:'AWS Transfer Family',ans:'a',why:'DataSync=<b>大量データの高速転送に特化</b>。Transfer FamilyはSFTP/FTPS窓口。',tip:'大量転送＝DataSync。SFTP受け口＝Transfer Family。'},
       {s:'100TB級を回線が細い拠点から物理デバイスでオフライン移行',a:'DataSync',b:'AWS Snowball',ans:'b',why:'Snowball=<b>物理デバイスでオフライン大容量移行</b>。回線が細い時に有効。',tip:'巨大＋細回線＝Snowball(物理搬送)。'},
-      {s:'Kafkaのスキーマ進化と互換性を一元管理したい',a:'Glue Schema Registry',b:'アプリ側で手動管理',ans:'a',why:'Glue Schema Registry=<b>スキーマ進化・互換性チェックを管理</b>。',tip:'スキーマ進化管理＝Glue Schema Registry。'},
-      {s:'DynamoDBテーブルの項目変更(挿入・更新・削除)を捕捉して下流へ連携したい',a:'DynamoDB Streams',b:'Kinesis Data Streams',ans:'a',why:'DynamoDBの変更捕捉は<b>DynamoDB Streams</b>。項目レベルの変更をLambda等へ。KDSは汎用ストリーム。',tip:'DynamoDBの変更を捕捉＝DynamoDB Streams。'},
+      {s:'Kafkaのスキーマ進化と互換性を一元管理したい',a:'Glue Schema Registry',b:'Glue Data Catalog',ans:'a',why:'Glue Schema Registry=<b>ストリームのスキーマ進化・互換性チェック（後方/前方互換）を管理</b>。Data Catalogはテーブル定義のカタログで、互換性チェックはしない。',tip:'ストリームのスキーマ互換性＝Schema Registry。テーブル定義＝Data Catalog。'},
+      {s:'DynamoDBテーブルの項目変更(挿入・更新・削除)を捕捉して下流へ連携したい',a:'DynamoDB Streams',b:'Kinesis Data Streams',ans:'a',why:'DynamoDBの変更捕捉は<b>DynamoDB Streams</b>（24時間保持・順序保証・Lambdaトリガー連携）。KDSへ流す連携機能もあるが、それは長期保持や多数コンシューマーが要る場合の拡張。',tip:'DynamoDBの変更を捕捉＝DynamoDB Streams。長期保持・多数読み手ならKDS連携。'},
       {s:'小さなレコードが大量。PutRecordのPUT課金が膨らみスループットも頭打ち',a:'シャード数を増設',b:'KPL(Producer Library)の集約',ans:'b',why:'<b>KPL集約</b>で複数レコードを1つにまとめPUT回数を削減。消費側はKCL。増設はコスト増で本質解決でない。',tip:'小レコード大量でPUT課金＝KPL集約。'}
     ]
   },
@@ -157,13 +157,12 @@ const decks = {
       {s:'前回実行以降に届いた新規ファイルだけを差分処理したい',a:'処理済み一覧を自前でDynamoDBに記録',b:'ジョブブックマークを有効化',ans:'b',why:'Glueの<b>ジョブブックマーク</b>が処理済みを自動追跡。自前管理は車輪の再発明。',tip:'Glueの増分処理＝ジョブブックマーク。'},
       {s:'Sparkクラスタの起動・停止管理なしでSparkジョブを実行したい',a:'EMR Serverless',b:'EMR on EC2',ans:'a',why:'EMR Serverless=<b>クラスタ管理不要</b>で自動プロビジョン。',tip:'Spark＋クラスタ管理ゼロ＝EMR Serverless。'},
       {s:'SLAが緩いバッチを、多少遅くてもいいので安く回したい',a:'標準実行',b:'Glue Flex実行',ans:'b',why:'Flex=<b>余剰キャパで割安</b>（開始遅延を許容）。',tip:'急がないバッチを安く＝Glue Flex。'},
-      {s:'S3上に大量の小さなファイルができてクエリが遅い。どう対処？',a:'コンパクション（ファイル結合）',b:'そのまま放置',ans:'a',why:'小ファイルは<b>結合して最適サイズ化</b>するとスキャン効率が上がる。',tip:'小ファイル問題＝コンパクションで結合。'},
-      {s:'ETLの複数ステップ（ジョブ→クローラ→ジョブ）の依存を組みたい（Glue中心）',a:'手動で順番に実行',b:'Glue Workflows',ans:'b',why:'Glue Workflows=<b>Glueジョブ/クローラの依存を連結</b>。',tip:'Glue中心の連結＝Glue Workflows。'},
+      {s:'S3上に大量の小さなファイルができてクエリが遅い。どう対処？',a:'コンパクション（ファイル結合）',b:'各ファイルをGZIP圧縮する',ans:'a',why:'遅さの原因は<b>ファイル数（1ファイルごとのオープン・リスト処理のオーバーヘッド）</b>。結合して128MB〜1GB程度に最適サイズ化する。圧縮してもファイル数は減らず解決しない。',tip:'小ファイル問題＝コンパクションで結合。圧縮では数が減らない。'},
+      {s:'ETLの複数ステップ（ジョブ→クローラ→ジョブ）の依存を組みたい（Glue中心）',a:'AWS Step Functions',b:'Glue Workflows',ans:'b',why:'Glue Workflows=<b>Glueジョブ/クローラをネイティブに連結</b>（追加コードなし・Glueコンソールで完結）。Step Functionsでも組めるが、Glue内で完結する構成ならWorkflowsが最小構成。',tip:'Glueだけの連結＝Glue Workflows。他サービス混在の分岐/リトライ＝Step Functions。'},
       {s:'列指向で圧縮が効き、分析クエリのスキャン量を減らす保存形式は？',a:'Parquet / ORC',b:'CSV / JSON',ans:'a',why:'Parquet/ORC=<b>列指向・圧縮・述語プッシュダウン</b>でスキャン削減。',tip:'分析用の保存＝列指向(Parquet/ORC)。'},
-      {s:'S3へのクエリ結果を新テーブル＋Parquetで一発書き出し',a:'Athena CTAS',b:'手動でGlueジョブを書く',ans:'a',why:'CTAS=<b>CREATE TABLE AS SELECTでクエリ結果を新テーブル化</b>・フォーマット指定可。',tip:'クエリ結果を新テーブル＝Athena CTAS。'},
-      {s:'RDS等の複数ソースを事前コピーせず横断SQLしたい',a:'都度エクスポートして結合',b:'Athena Federated Query',ans:'b',why:'Federated Query=<b>コネクタで多様なソースを直接横断クエリ</b>。事前コピー不要。',tip:'事前コピーなし横断＝Athena Federated Query。'},
-      {s:'大テーブルと小テーブルの結合で、シャッフルを避け高速化',a:'ブロードキャストジョイン',b:'通常のシャッフルジョイン',ans:'a',why:'ブロードキャスト=<b>小テーブルを全ノードに配布</b>しシャッフル回避。',tip:'小テーブル配布で高速結合＝ブロードキャストジョイン。'},
-    
+      {s:'S3へのクエリ結果を新テーブル＋Parquetで一発書き出し',a:'Athena CTAS',b:'Athena UNLOAD',ans:'a',why:'CTAS=<b>クエリ結果をParquet等で書き出し＋新テーブルとしてカタログ登録</b>まで一発。UNLOADはS3へのファイル書き出しのみでテーブルは作られない。',tip:'テーブルも作る＝CTAS。ファイルだけ吐く＝UNLOAD。'},
+      {s:'RDS等の複数ソースを事前コピーせず横断SQLしたい',a:'Redshift Spectrum',b:'Athena Federated Query',ans:'b',why:'Federated Query=<b>Lambdaコネクタ経由でRDS・DynamoDB等の多様なソースを直接横断クエリ</b>。SpectrumがロードせずクエリできるのはS3上の外部テーブルだけ。',tip:'RDS等も横断＝Federated Query。S3だけ直接＝Spectrum。'},
+      {s:'大テーブルと小テーブルの結合で、シャッフルを避け高速化',a:'ブロードキャストジョイン',b:'通常のシャッフルジョイン',ans:'a',why:'ブロードキャスト=<b>小テーブルを全ノードに配布</b>しシャッフル回避。',tip:'小テーブル配布で高速結合＝ブロードキャストジョイン。'}
     ]
   },
   'store': {
@@ -180,10 +179,10 @@ const decks = {
       {s:'DynamoDBの全データを分析用にS3へ、テーブル負荷をかけずに出したい',a:'全項目をScan',b:'S3へのエクスポート（PITR活用）',ans:'b',why:'<b>S3エクスポート</b>はテーブルのRCUを消費せず全件出力。Scanは高負荷。',tip:'DynamoDB→分析＝S3エクスポート(Scanしない)。'},
       {s:'複数チームでRedshiftのデータをコピーせず共有したい',a:'Redshiftデータ共有（Data Sharing）',b:'UNLOADして配布',ans:'a',why:'Data Sharing=<b>コピーせずライブに共有</b>。',tip:'コピーなし共有＝Redshift Data Sharing。'},
       {s:'DynamoDBの読み取りをマイクロ秒級に高速化',a:'ElastiCacheを自前構築',b:'DynamoDB Accelerator（DAX）',ans:'b',why:'DAX=<b>DynamoDB専用インメモリキャッシュ</b>・マイクロ秒応答。',tip:'DynamoDB読み取り高速化＝DAX。'},
-      {s:'DynamoDBを複数リージョンで双方向にレプリケート',a:'グローバルテーブル',b:'自前でクロスリージョン複製',ans:'a',why:'グローバルテーブル=<b>マルチリージョン双方向レプリケーション</b>をマネージド提供。',tip:'DynamoDBマルチリージョン＝グローバルテーブル。'},
+      {s:'DynamoDBを複数リージョンで双方向にレプリケート',a:'グローバルテーブル',b:'DynamoDB Streams＋Lambdaで複製',ans:'a',why:'グローバルテーブル=<b>マルチリージョン双方向レプリケーション</b>をマネージド提供（競合解決も内蔵）。Streams＋Lambdaの自前複製は片方向が基本で、双方向はループ防止・競合解決を自作する羽目になる。',tip:'DynamoDBマルチリージョン＝グローバルテーブル。自前Streams複製は運用が重い。'},
       {s:'業務データを既存アプリからSQLで結合・集計・トランザクション更新したい',a:'Amazon Aurora PostgreSQL',b:'Amazon OpenSearch Service',ans:'a',why:'Aurora PostgreSQL=<b>SQLで業務データを結合・集計するRDB</b>。OpenSearchは全文検索・ログ分析・可視化に強い検索エンジン。',tip:'SQLで結合/更新＝Aurora。全文検索/ログ可視化＝OpenSearch。'},
       {s:'高カーディナリティ列で過剰パーティションを避けつつ等値検索を速く',a:'Bucketing（ハッシュ振り分け）',b:'その列でパーティション',ans:'a',why:'Bucketing=<b>ハッシュで固定数バケットに振り分け</b>・パーティション肥大を回避。',tip:'高カーディナリティ＝Bucketing(パーティションでなく)。'},
-      {s:'S3上のCSV/Parquetをスキャン量最小でSQL集計したい',a:'Amazon Athena（列指向Parquet+パーティション）',b:'CSVのままAthenaでSELECT *',ans:'a',why:'<b>列指向Parquet+パーティション+必要列だけSELECT</b>でスキャン量とコストを大幅削減。CSV+SELECT *は全件フルスキャン。',tip:'スキャン量削減＝Parquet+パーティション+必要列だけ。'},
+      {s:'S3上のCSVをスキャン量最小でSQL集計したい',a:'Parquetに変換＋パーティション化してAthena',b:'CSVをGZIP圧縮してAthena',ans:'a',why:'<b>列指向Parquet+パーティション+必要列だけSELECT</b>が最小。GZIP圧縮もスキャン課金は減るが、行指向のままなので不要な列まで読む＋分割不可で並列度も落ちる。',tip:'スキャン量最小＝列指向Parquet+パーティション。圧縮だけでは列を絞れない。'},
       {s:'アクセス頻度が下がった古いデータを自動で安価な階層へ移し保持したい(頻度は予測可能)',a:'S3ライフサイクルポリシー',b:'S3 Intelligent-Tiering',ans:'a',why:'<b>ライフサイクル</b>=経過日数で自動階層移行/削除。頻度が読めるならこれ。読めない時はIntelligent-Tiering。',tip:'経過日数で自動アーカイブ＝ライフサイクル。'},
       {s:'数十万パーティションの登録が遅く、カタログのメタデータも肥大している',a:'Glueクローラで逐次登録',b:'パーティション射影(partition projection)',ans:'b',why:'<b>射影</b>=命名規則からパーティションを動的算出。カタログ登録もクローラ実行も不要。',tip:'大量パーティションの登録遅延＝射影。'},
       {s:'有効期限を過ぎたDynamoDBの項目を、追加キャパシティ無しで自動削除しスリムに保つ',a:'DynamoDB TTL',b:'定期起動のScan削除バッチ',ans:'a',why:'<b>TTL</b>=期限切れ項目を追加キャパシティ消費なしで自動削除。Scan削除はRCU/WCUとコード保守が重い。',tip:'期限切れ自動削除＝TTL。'}
@@ -195,14 +194,14 @@ const decks = {
       {s:'既存のAirflow DAG資産と運用ノウハウを活かしてマネージド化したい',a:'AWS Step Functions',b:'Amazon MWAA',ans:'b',why:'MWAA=<b>マネージドAirflow</b>。既存DAGをそのまま流用できる。',tip:'既存Airflow資産＝MWAA。'},
       {s:'サーバーレスに状態遷移・分岐・リトライを定義（Airflow資産なし）',a:'AWS Step Functions',b:'Amazon MWAA',ans:'a',why:'Step Functions=<b>サーバーレスなワークフロー</b>。ゼロから組むなら軽量。',tip:'サーバーレスで新規＝Step Functions。'},
       {s:'数万件を並列で反復処理（大規模fan-out）したい',a:'Lambdaで直列ループ',b:'Step Functions 分散マップ',ans:'b',why:'分散マップ=<b>大規模並列反復</b>を管理。直列ループは遅く上限も厳しい。',tip:'大規模並列反復＝分散マップ(Distributed Map)。'},
-      {s:'データの欠損・異常・重複をルールで自動検査したい',a:'Glue Data Quality',b:'自前SQLでチェック',ans:'a',why:'Glue Data Quality=<b>DQDLルールセット</b>で品質を自動評価。',tip:'データ品質チェック＝Glue Data Quality。'},
+      {s:'データの欠損・異常・重複をルールで自動検査したい',a:'Glue Data Quality',b:'Glue DataBrewのプロファイル',ans:'a',why:'Glue Data Quality=<b>DQDLルールセットで合否を自動評価</b>し、パイプラインに組み込める。DataBrewのプロファイルは統計を眺める探索用で、ルールベースの継続検査ではない。',tip:'ルールで合否判定＝Glue Data Quality。統計を眺める＝DataBrewプロファイル。'},
       {s:'イベントソースを軽量に変換してターゲットへ中継（フィルタ・エンリッチ）',a:'自前Lambda中継を実装',b:'EventBridge Pipes',ans:'b',why:'Pipes=<b>source→filter→enrich→targetを設定で実現</b>。',tip:'イベント中継の配管＝EventBridge Pipes。'},
-      {s:'cron的に定時起動したい（多数のスケジュールを一元管理）',a:'EventBridge Scheduler',b:'各サービスで個別にcron',ans:'a',why:'Scheduler=<b>大量スケジュールを一元管理</b>・柔軟なcron/rate。',tip:'定時起動の一元管理＝EventBridge Scheduler。'},
-      {s:'再実行しても二重集計にならないパイプラインにしたい',a:'とにかくリトライ',b:'冪等性（デデュープ/上書き設計）',ans:'b',why:'<b>冪等な設計</b>で重複実行を無害化。リトライ前提ほど重要。',tip:'再実行安全＝冪等性(idempotency)。'},
-      {s:'特定のログパターン発生数をメトリクス化してアラームしたい',a:'CloudWatch メトリクスフィルタ',b:'ログを目視で確認',ans:'a',why:'メトリクスフィルタ=<b>ログのパターンを数値メトリクス化</b>しアラーム可能。',tip:'ログ→メトリクス＝メトリクスフィルタ。'},
-      {s:'大量ログを対話的にクエリして障害を調査',a:'目視でログを確認',b:'CloudWatch Logs Insights',ans:'b',why:'Logs Insights=<b>ログを対話的にクエリ・集計</b>して原因調査。',tip:'ログ対話クエリ＝Logs Insights。'},
+      {s:'cron的に定時起動したい（多数のスケジュールを一元管理）',a:'EventBridge Scheduler',b:'EventBridgeルール（スケジュール式）',ans:'a',why:'Scheduler=<b>スケジュール専用の新機能</b>。数百万スケジュール・タイムゾーン・ワンタイム実行・柔軟なリトライに対応。ルールのスケジュール式は旧方式で、AWSもSchedulerへの移行を推奨。',tip:'大量・一元管理の定時起動＝Scheduler。ルールのcronは旧方式。'},
+      {s:'再実行しても二重集計にならないパイプラインにしたい',a:'SQS FIFOの重複排除に任せる',b:'冪等性（デデュープ/上書き設計）',ans:'b',why:'<b>冪等な設計</b>（キーで上書き・処理済み記録）なら何度再実行しても結果が同じ。FIFOの重複排除は投入時5分間のみ有効で、ジョブ再実行やバッチのやり直しまでは守れない。',tip:'再実行安全＝冪等性(idempotency)。FIFO重複排除は5分窓だけ。'},
+      {s:'特定のログパターン発生数をメトリクス化してアラームしたい',a:'CloudWatch メトリクスフィルタ',b:'CloudWatch Logs Insights',ans:'a',why:'メトリクスフィルタ=<b>ログのパターンを常時カウントして数値メトリクス化</b>→アラームに直結できる。Logs Insightsは都度実行の対話クエリで、常時監視やアラームには向かない。',tip:'常時監視→アラーム＝メトリクスフィルタ。都度の調査＝Logs Insights。'},
+      {s:'大量ログを対話的にクエリして障害を調査',a:'CloudWatch メトリクスフィルタ',b:'CloudWatch Logs Insights',ans:'b',why:'Logs Insights=<b>専用クエリ言語でログを対話的に検索・集計</b>して原因調査。メトリクスフィルタは発生数を数えるだけで、ログの中身を掘って調査はできない。',tip:'掘って調査＝Logs Insights。数えて監視＝メトリクスフィルタ。'},
       {s:'高頻度・短時間で大量に走るワークフロー',a:'Step Functions Express',b:'Step Functions Standard',ans:'a',why:'Express=<b>高頻度・短時間・低コスト</b>。Standardは長時間・監査向き。',tip:'高頻度短時間＝Express。長時間監査＝Standard。'},
-      {s:'データパイプラインを再現可能にコードで管理・デプロイ',a:'手動でコンソール構築',b:'CloudFormation / CDK',ans:'b',why:'IaC=<b>構成をコード化し再現可能にデプロイ</b>。',tip:'再現可能な構築＝IaC(CloudFormation/CDK)。'},
+      {s:'データパイプラインのインフラを再現可能にコードで管理・デプロイ',a:'AWS Config',b:'CloudFormation / CDK',ans:'b',why:'IaC(CloudFormation/CDK)=<b>構成をコード化してリソースを作成・デプロイ</b>する。Configは既にあるリソースの構成を記録・評価するだけで、構築はしない。',tip:'作る＝IaC(CloudFormation/CDK)。できたものを監視＝Config。'},
       {s:'誰がいつどんなAWS API操作を行ったかを追跡・監査したい',a:'AWS CloudTrail',b:'Amazon CloudWatch Logs',ans:'a',why:'CloudTrail=<b>API操作の証跡(誰が/いつ/何を)</b>を記録。CloudWatch Logsはアプリ/リソースの実行ログ。',tip:'API操作の監査＝CloudTrail。アプリ/実行ログ＝CloudWatch Logs。'},
       {s:'毒メッセージ(壊れたペイロード)でLambda処理が失敗し続け、キューが詰まる',a:'Lambdaのリトライ回数を増やす',b:'DLQ+maxReceiveCount',ans:'b',why:'<b>DLQ</b>=最大受信回数超過で自動退避し隔離、後から調査・再処理。リトライ増だけでは詰まりは解けない。',tip:'毒メッセージ隔離＝DLQ。'},
       {s:'コスト傾向をサービス別・タグ別に可視化しつつ、予算超過をしきい値で自動通知したい',a:'Cost Anomaly Detection',b:'Cost Explorer+AWS Budgets',ans:'b',why:'<b>Cost Explorer(傾向可視化)+Budgets(予算しきい値アラート)</b>。異常検知は普段と違う急増用で予算管理とは別。',tip:'傾向可視化＋予算アラート＝CostExplorer+Budgets。'}
@@ -212,15 +211,15 @@ const decks = {
     name: '🛡 セキュリティ・ガバナンスの選び方',
     cards: [
       {s:'データレイクを行・列・セル単位できめ細かくアクセス制御したい',a:'S3バケットポリシー/IAM',b:'AWS Lake Formation',ans:'b',why:'Lake Formation=<b>行/列/セル＋LF-Tags</b>の一元ガバナンス。',tip:'ファイングレイン＝Lake Formation。'},
-      {s:'増減する多数のアナリストに、属性・タグでまとめて権限付与したい',a:'LF-Tags（タグベースアクセス制御）',b:'個別にIAMを追記',ans:'a',why:'LF-Tags=<b>タグで権限をスケーラブルに付与</b>。',tip:'タグで一括権限＝LF-Tags。'},
+      {s:'データレイクの増減する多数のアナリストに、タグでまとめてテーブル・列の権限付与',a:'LF-Tags（タグベースアクセス制御）',b:'テーブルごとに個別GRANT',ans:'a',why:'LF-Tags=<b>タグをDB/テーブル/列に付け、タグへの許可だけで新規リソースにも自動適用</b>。個別GRANTはテーブルやユーザーが増えるたびに権限管理が破綻する。',tip:'増え続けるデータレイク権限＝LF-Tagsで一括。個別GRANTはスケールしない。'},
       {s:'暗号化キーの使用をCloudTrailで監査し、特定ロールに限定したい',a:'SSE-S3',b:'SSE-KMS',ans:'b',why:'SSE-KMS=<b>キーの監査・アクセス制御</b>が可能。SSE-S3はキー制御・監査ができない。',tip:'キーの監査・制御が要る＝SSE-KMS。'},
       {s:'キー管理を任せて追加料金なしでS3を暗号化（監査要件なし）',a:'SSE-KMS',b:'SSE-S3',ans:'b',why:'SSE-S3=<b>AWS管理・追加料金なし</b>。監査/制御は不要な場合に十分。',tip:'手軽・無料の暗号化＝SSE-S3。'},
       {s:'クエリ結果の特定列（患者ID等）を役割に応じて動的にマスキング',a:'手動でビューを都度作成',b:'Redshift 動的データマスキング',ans:'b',why:'動的データマスキング=<b>ポリシーで列値を動的に隠す</b>。',tip:'列を動的マスク＝Redshift Dynamic Data Masking。'},
       {s:'S3内のPII（個人情報）などの機密データを自動検出したい',a:'Amazon Macie',b:'Amazon GuardDuty',ans:'a',why:'Macie=<b>S3の機密データ検出</b>。GuardDutyは脅威検知。',tip:'S3の機密データ検出＝Macie。脅威検知はGuardDuty。'},
-      {s:'DBの認証情報を安全に保管し、自動ローテーションしたい',a:'環境変数に直書き',b:'AWS Secrets Manager',ans:'b',why:'Secrets Manager=<b>保管＋自動ローテーション</b>。',tip:'認証情報の保管・自動更新＝Secrets Manager。'},
+      {s:'DBの認証情報を安全に保管し、自動ローテーションしたい',a:'SSM Parameter Store（SecureString）',b:'AWS Secrets Manager',ans:'b',why:'Secrets Manager=<b>RDS等との統合による自動ローテーションを内蔵</b>。Parameter Storeも暗号化保管はできるが、ローテーションは自前Lambdaを組む必要がある。',tip:'自動ローテーション込み＝Secrets Manager。保管だけ安く＝Parameter Store。'},
       {s:'GlueやS3への通信をインターネットに出さずVPC内で完結させたい',a:'VPCエンドポイント',b:'NATゲートウェイ経由',ans:'a',why:'VPCエンドポイント=<b>プライベート接続</b>でネット非経由。',tip:'AWSサービスへ非公開接続＝VPCエンドポイント。'},
       {s:'名寄せ可・生値を出さない・後で戻せる形で機密IDを保護',a:'一方向ハッシュ化',b:'トークナイゼーション',ans:'b',why:'トークナイゼーション=<b>可逆・参照整合性を保つ</b>置換。ハッシュは不可逆で戻せない。',tip:'可逆＋名寄せ＝トークナイゼーション。戻せないのはハッシュ。'},
-      {s:'リソース構成がルールに準拠しているか継続評価・自動修復',a:'AWS Config',b:'手動で定期監査',ans:'a',why:'Config=<b>構成コンプライアンスを継続評価</b>＋自動修復連携。',tip:'構成コンプラ継続評価＝AWS Config。'},
+      {s:'リソース構成がルールに準拠しているか継続評価・自動修復',a:'AWS Config',b:'AWS CloudTrail',ans:'a',why:'Config=<b>リソースの「今の構成状態」をルールで継続評価</b>し、SSM連携で自動修復まで可能。CloudTrailは「誰が何をしたか」のAPI操作履歴で、準拠評価はしない。',tip:'構成の状態を評価＝Config。操作の履歴を追う＝CloudTrail。'},
       {s:'DR用に複数リージョンで同一の暗号化キーを使いたい',a:'リージョンごとに別々のキー',b:'KMSマルチリージョンキー',ans:'b',why:'マルチリージョンキー=<b>同一キーマテリアルを複数リージョンで</b>利用可。',tip:'複数リージョンで同一キー＝KMSマルチリージョンキー。'},
       {s:'S3データを一定期間、改ざん・削除不可（WORM）で保持',a:'S3 Object Lock',b:'バケットポリシーで制限',ans:'a',why:'Object Lock=<b>WORM保持</b>で規制対応。ポリシーは外せてしまう。',tip:'改ざん削除不可＝S3 Object Lock(WORM)。'},
       {s:'別アカウントの分析者に、テーブル/列単位で権限を絞ってデータを共有したい',a:'Lake Formationクロスアカウント共有',b:'S3へエクスポートしてコピー配布',ans:'a',why:'<b>LFクロスアカウント共有</b>=テーブル/列(データフィルタ)単位で権限付与・再委任・取消も容易。コピーは複製が残り制御不能。',tip:'別アカウントへ列単位共有＝LFクロスアカウント。'}
@@ -252,7 +251,7 @@ const decks = {
       {s:'IAMプリンシパルとAWSリソースのタグを照合して、多数のリソースへの権限を自動化',a:'IAMのABAC',b:'Lake FormationのLF-Tags',ans:'a',why:'ABAC=<b>IAM主体とAWSリソースの属性</b>で認可。LF-Tagsはデータカタログのデータベース・テーブル・列を分類して認可する。',tip:'AWSリソース全般＝ABAC。データレイクの表・列＝LF-Tags。'},
       {s:'同じS3バケットに対し、アプリごとに異なるアクセス方針と専用エンドポイントを持たせる',a:'S3 Access Point',b:'VPCエンドポイント',ans:'a',why:'S3 Access Point=<b>利用者・アプリ別のS3アクセス窓口とポリシー</b>。VPCエンドポイントはAWSサービスへ非公開通信する経路。',tip:'S3の入口を分ける＝Access Point。インターネットを通さない＝VPC endpoint。'},
       {s:'AWSへ送信する前にクライアント側で暗号化し、AWS側にも平文を渡したくない',a:'TLSによる転送中暗号化',b:'クライアント側暗号化',ans:'b',why:'TLS=<b>通信路</b>を暗号化。クライアント側暗号化は送信前にデータ自体を暗号化する。',tip:'道を暗号化＝TLS。荷物そのものを先に暗号化＝クライアント側。'},
-      {s:'特定の分析チームがデータ・ツール・権限をまとめて利用する作業単位',a:'ドメイン',b:'ドメインユニット',c:'プロジェクト',ans:'c',why:'ドメインは組織全体の管理境界、ドメインユニットは部門などの階層、<b>プロジェクトは実際の作業・共同利用単位</b>。',tip:'全体の境界＝ドメイン。組織階層＝ドメインユニット。作業場所＝プロジェクト。'}
+      {s:'Amazon DataZoneで、特定の分析チームがデータ・ツール・権限をまとめて利用する作業単位',a:'ドメイン',b:'ドメインユニット',c:'プロジェクト',ans:'c',why:'ドメインは組織全体の管理境界、ドメインユニットは部門などの階層、<b>プロジェクトは実際の作業・共同利用単位</b>。',tip:'全体の境界＝ドメイン。組織階層＝ドメインユニット。作業場所＝プロジェクト。'}
     ]
   }
 };
